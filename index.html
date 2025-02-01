@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CosmoTalker</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="nav.css">
+</head>
+<body>
+    <nav class="navbar">
+        <ul class="right-nav">
+            <li><a href="https://bhuvaneshm.in">Home</a></li>
+            <li><a href="https://www.linkedin.com/in/bhuvaneshm-developer/" target="_blank">LinkedIn</a></li>
+            <li><a href="https://bhuvaneshm.in/skytalker/about/" target="_blank">About</a></li>
+            <li><a href="#" id="more-btn">More</a></li>
+        </ul>
+    </nav>
+
+    <div class="popup" id="more-popup">
+        <div class="popup-content">
+            <span class="close-btn" id="close-btn">&times;</span>
+            <ul>
+                <li><a href="https://github.com/bhuvanesh-m-dev" target="_blank">GitHub</a></li>
+                <li><a href="https://www.hackerrank.com/profile/bhuvaneshm_dev" target="_blank">HackerRank</a></li>
+                <li><a href="https://leetcode.com/u/bhuvaneshm_dev/" target="_blank">LeetCode</a></li>
+                <li><a href="https://x.com/bhuvaneshm06" target="_blank">X</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="chat-container">
+        <div class="reply-title">CosmoTalker</div>
+        <div id="chat-output"></div>
+        <div class="input-container">
+            <input type="text" id="user-input" placeholder="Ask about celestial objects...">
+            <button id="send-btn" onclick="processInput()">Send</button>
+        </div>
+    </div>
+
+    <script src="nav.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
+
