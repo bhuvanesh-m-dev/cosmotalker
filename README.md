@@ -152,4 +152,4 @@ import cosmotalker
 
 print(cosmotalker.get("earth"))    # Instant data about Earth
 
-###Stay tuned for future enhancements!
+#Stay tuned for future enhancements!
