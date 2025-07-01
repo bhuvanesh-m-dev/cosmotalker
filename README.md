@@ -122,7 +122,7 @@ Offline Response Times:
 * **LeetCode**: [bhuvaneshm\_dev](https://leetcode.com/u/bhuvaneshm_dev)
 * **Dev.to**: [@bhuvaneshm\_dev](https://dev.to/bhuvaneshm_dev)
 * **Twitter (X)**: [@bhuvaneshm06](https://x.com/bhuvaneshm06)
-* **Instagram**: [@bhuvaneshm.developer](https://instagram.com/bhuvaneshm.developer)
+* **Instagram**: [@bhuvanesh.m06](https://instagram.com/bhuvanesh.m06)
 
 ---
 
