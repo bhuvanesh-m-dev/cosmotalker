@@ -12,7 +12,7 @@ furnished to do so, subject to the following conditions:
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
 
-Attribution Request:
+
 Although not required, I kindly ask that you give credit to the original author (Bhuvanesh M) if you use this project or its code in your own work.  
 A link to the original repository is appreciated: https://github.com/bhuvanesh-m-dev/cosmotalker  
 
