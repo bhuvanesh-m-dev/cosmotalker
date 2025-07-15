@@ -1,5 +1,3 @@
-# 🚩 Project Badges
-
 [![PyPI Downloads](https://static.pepy.tech/badge/cosmotalker)](https://pepy.tech/projects/cosmotalker)
 [![PyPI version](https://img.shields.io/pypi/v/cosmotalker)](https://pypi.org/project/cosmotalker/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg )](https://github.com/bhuvanesh-m-dev/cosmotalker/blob/main/document/LICENSE )
