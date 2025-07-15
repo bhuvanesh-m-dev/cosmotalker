@@ -1,3 +1,14 @@
+# 🚩 Project Badges
+
+[![PyPI Downloads](https://static.pepy.tech/badge/cosmotalker)](https://pepy.tech/projects/cosmotalker)
+[![PyPI version](https://img.shields.io/pypi/v/cosmotalker)](https://pypi.org/project/cosmotalker/)
+[![License](https://img.shields.io/github/license/bhuvanesh-m-dev/cosmotalker)](https://github.com/bhuvanesh-m-dev/cosmotalker/blob/main/LICENSE)
+[![Last Commit](https://img.shields.io/github/last-commit/bhuvanesh-m-dev/cosmotalker)](https://github.com/bhuvanesh-m-dev/cosmotalker)
+[![Issues](https://img.shields.io/github/issues/bhuvanesh-m-dev/cosmotalker)](https://github.com/bhuvanesh-m-dev/cosmotalker/issues)
+[![Stars](https://img.shields.io/github/stars/bhuvanesh-m-dev/cosmotalker)](https://github.com/bhuvanesh-m-dev/cosmotalker/stargazers)
+[![Made with Python](https://img.shields.io/badge/Made%20with-Python-blue?logo=python)](https://www.python.org/)
+
+
 # ✨ Welcome to CosmoTalker v2 – Now Smarter, Broader, and Even More User-Friendly!
 
 🚀 **CosmoTalker v2** is officially here!
