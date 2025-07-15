@@ -3,16 +3,6 @@ import webbrowser
 import os
 
 def fetch_nasa_apod(api_key, date=None):
-    """
-    Fetches the Astronomy Picture of the Day (APOD) from NASA's API.
-    
-    Parameters:
-        api_key (str): Your NASA API key.
-        date (str, optional): The date in YYYY-MM-DD format for which APOD is requested.
-    
-    Returns:
-        dict: The JSON response containing APOD details.
-    """
     url = f"https://api.nasa.gov/planetary/apod?api_key={api_key}"
     if date:
         url += f"&date={date}"
@@ -33,11 +23,7 @@ def fetch_nasa_apod(api_key, date=None):
         print(f"Error fetching data from NASA API: {e}")
         return None
 
-def apod(api_key="kdtw***************************283Dj", date=None):
-    """
-    Fetches APOD data for a given date (or today's APOD if no date is provided).
-    Opens the APOD URL in a web browser if available.
-    """
+def apod(api_key="kdtw***************************283Dj", date=None):    
     if not api_key or api_key == "bhuvanesh API":
         api_key = os.getenv("NASA_API_KEY")  
         if not api_key:
