@@ -64,4 +64,4 @@ def info(query):
             print("Invalid input. Please enter a valid number.")
             return
 
-info('earth')
+
