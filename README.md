@@ -2,7 +2,7 @@
 
 [![PyPI Downloads](https://static.pepy.tech/badge/cosmotalker)](https://pepy.tech/projects/cosmotalker)
 [![PyPI version](https://img.shields.io/pypi/v/cosmotalker)](https://pypi.org/project/cosmotalker/)
-[![License](https://img.shields.io/github/license/bhuvanesh-m-dev/cosmotalker)](https://github.com/bhuvanesh-m-dev/cosmotalker/blob/document/LICENSE)
+[![License](https://img.shields.io/github/license/bhuvanesh-m-dev/cosmotalker)](https://github.com/bhuvanesh-m-dev/cosmotalker/blob/main/document/LICENSE)
 [![Last Commit](https://img.shields.io/github/last-commit/bhuvanesh-m-dev/cosmotalker)](https://github.com/bhuvanesh-m-dev/cosmotalker)
 [![Issues](https://img.shields.io/github/issues/bhuvanesh-m-dev/cosmotalker)](https://github.com/bhuvanesh-m-dev/cosmotalker/issues)
 [![Stars](https://img.shields.io/github/stars/bhuvanesh-m-dev/cosmotalker)](https://github.com/bhuvanesh-m-dev/cosmotalker/stargazers)
