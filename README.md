@@ -5,7 +5,7 @@
 [![Issues](https://img.shields.io/github/issues/bhuvanesh-m-dev/cosmotalker)](https://github.com/bhuvanesh-m-dev/cosmotalker/issues)
 [![Stars](https://img.shields.io/github/stars/bhuvanesh-m-dev/cosmotalker)](https://github.com/bhuvanesh-m-dev/cosmotalker/stargazers)
 [![Made with Python](https://img.shields.io/badge/Made%20with-Python-blue?logo=python)](https://www.python.org/)  
- [![Typing SVG](https://readme-typing-svg.herokuapp.com?font=Fira+Code&duration=6000&pause=1000&color=DCBDF7&multiline=true&width=460&height=145&lines=Offline+heart%2C+cosmic+art%E2%80%94;Planets+whisper%2C+searches+spark.;Images+bloom%2C+green+quests+ignite%2C;No+net%2C+just+stars+in+terminal+light.;For+coders%2C+dreamers%2C+minds+that+soar%E2%80%94;The+universe%2C+now+at+your+core.)](https://git.io/typing-svg)
+ [![Typing SVG](https://readme-typing-svg.herokuapp.com?font=Fira+Code&duration=6000&pause=1000&color=DCBDF7&multiline=true&width=460&height=150&lines=Offline+heart%2C+cosmic+art%E2%80%94;Planets+whisper%2C+searches+spark.;Images+bloom%2C+green+quests+ignite%2C;No+net%2C+just+stars+in+terminal+light.;For+coders%2C+dreamers%2C+minds+that+soar%E2%80%94;The+universe%2C+now+at+your+core.)](https://git.io/typing-svg)
 
 # ✨ Welcome to CosmoTalker v2 – Now Smarter, Broader, and Even More User-Friendly!
 
