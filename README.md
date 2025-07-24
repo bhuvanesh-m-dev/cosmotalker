@@ -16,6 +16,7 @@ Explore the **Solar System** and beyond with this **offline-Python library**, no
 > 📌 `.apk` for **Android** and `.exe` for **Windows** are rolling out soon!
 
 ---
+## 🎥 See CosmoTalker in Motion
 <p align="center">
   <a href="https://www.youtube.com/watch?v=71eGpymB1zE" target="_blank">
     <img src="https://img.youtube.com/vi/71eGpymB1zE/maxresdefault.jpg" alt="CosmoTalker Demo Video" width="600">
