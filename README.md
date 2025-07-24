@@ -26,6 +26,9 @@ Explore the **Solar System** and beyond with this **offline-Python library**, no
 <p align="center">
   <a href="https://www.youtube.com/watch?v=71eGpymB1zE" target="_blank">▶️ Watch CosmoTalker Demo on YouTube</a>
 </p>   
+
+---  
+
 **CosmoTalker** is a Python library developed by **[Bhuvanesh M](https://linkedin.com/in/bhuvaneshm-developer)** to bring **space exploration, astronomy data, and scientific facts** directly to your system — no internet required for core features.
 
 Perfect for **space lovers**, **students**, and **offline learners**. All core info is bundled with the module, while online features like space news and real-time updates extend the experience.
