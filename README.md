@@ -16,7 +16,16 @@ Explore the **Solar System** and beyond with this **offline-Python library**, no
 > 📌 `.apk` for **Android** and `.exe` for **Windows** are rolling out soon!
 
 ---
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=71eGpymB1zE" target="_blank">
+    <img src="https://img.youtube.com/vi/71eGpymB1zE/maxresdefault.jpg" alt="CosmoTalker Demo Video" width="600">
+  </a>
+</p>
 
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=71eGpymB1zE" target="_blank">▶️ Watch CosmoTalker Demo on YouTube</a>
+</p>
+---
 ## 🎐 What is CosmoTalker?
 
 **CosmoTalker** is a Python library developed by **[Bhuvanesh M](https://linkedin.com/in/bhuvaneshm-developer)** to bring **space exploration, astronomy data, and scientific facts** directly to your system — no internet required for core features.
