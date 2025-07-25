@@ -1,5 +1,5 @@
 [![PyPI Downloads](https://static.pepy.tech/badge/cosmotalker)](https://pepy.tech/projects/cosmotalker)
-[![PyPI version](https://img.shields.io/pypi/v/cosmotalker)](https://pypi.org/project/cosmotalker/)
+![PyPI](https://img.shields.io/pypi/v/cosmotalker.svg)
 [![Socket Badge](https://socket.dev/api/badge/pypi/package/cosmotalker)](https://socket.dev/pypi/package/cosmotalker)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg )](https://github.com/bhuvanesh-m-dev/cosmotalker/blob/main/document/LICENSE )
 [![Last Commit](https://img.shields.io/github/last-commit/bhuvanesh-m-dev/cosmotalker)](https://github.com/bhuvanesh-m-dev/cosmotalker)
