@@ -173,3 +173,10 @@ import cosmotalker
 print(cosmotalker.get("earth"))    # Instant data about Earth
 
 #Stay tuned for future enhancements!
+```
+
+## 🐧 Install CosmoTalker on Debian/Ubuntu
+
+```bash
+sudo apt update && sudo apt install python3-pip -y && pip3 install cosmotalker
+```
