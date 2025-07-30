@@ -210,6 +210,12 @@ _This directory will be updated periodically with accurate screenshots showing g
 
 ---
 
+🔗 **Mirror Source Example:**  
+Aliyun PyPI Mirror for CosmoTalker:  
+➡️ [https://mirrors.aliyun.com/pypi/simple/cosmotalker/](https://mirrors.aliyun.com/pypi/simple/cosmotalker/)
+
+---    
+
 ### 📎 Additional Sources Used
 
 - [pepy.tech/project/cosmotalker](https://pepy.tech/project/cosmotalker)  
