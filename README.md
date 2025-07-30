@@ -219,7 +219,8 @@ Aliyun PyPI Mirror for CosmoTalker:
 ### 📎 Additional Sources Used
 
 - [pepy.tech/project/cosmotalker](https://pepy.tech/project/cosmotalker)  
-- [pypistats.org/packages/cosmotalker](https://pypistats.org/packages/cosmotalker)  
+- [pypistats.org/packages/cosmotalker](https://pypistats.org/packages/cosmotalker)
+- [https://mirrors.aliyun.com/pypi/simple/cosmotalker/](https://github.com/bhuvanesh-m-dev/cosmotalker/blob/main/document/downloads/README.md)
 - PyPI mirrors (aliyun, tencent, pypi.python.org analytics)
 
 ---
