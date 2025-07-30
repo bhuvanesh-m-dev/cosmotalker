@@ -4,7 +4,7 @@
 
 ---
 
-## ✅ Total Downloads (Last 6 Months)
+## ✅ Total Downloads (Last 5 Months)
 
 | Source            | Count     |
 | ----------------- | --------- |
@@ -29,7 +29,7 @@ PyPI downloads are split into two categories:
 * **Without Mirror**: Directly from `pypi.org`
 * **With Mirror**: Downloads served through CDN mirrors (like Fastly or Aliyun)
 
-> 🔍 As of **July 30, 2025**, CosmoTalker has received **21,222 downloads via mirrors** in just the last **6 months**.
+> 🔍 As of **July 30, 2025**, CosmoTalker has received **21,222 downloads via mirrors** in just the last **5 months**.
 
 This proves that:
 
