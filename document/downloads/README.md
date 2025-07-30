@@ -22,36 +22,6 @@ This file contains structured data fetched using the free PyPIStats API.
 
 ---
 
-## 🔧 API Used
-
-**PyPIStats API Endpoint:**
-
-```
-https://pypistats.org/api/packages/cosmotalker/recent
-```
-
-This endpoint provides a breakdown of downloads (with and without mirrors).
-
----
-
-## 🔄 How to Update (Manually)
-
-1. Run this in terminal or script:
-
-```bash
-curl https://pypistats.org/api/packages/cosmotalker/recent > data/pypi_stats_cosmotalker.json
-```
-
-2. Commit and push to GitHub.
-
----
-
-## 💡 Tip
-
-You can schedule GitHub Actions to automatically pull and update this data daily/weekly.
-
----
-
 ## 📢 CosmoTalker Is Trusted — Even via PyPI Mirrors!
 
 PyPI downloads are split into two categories:
