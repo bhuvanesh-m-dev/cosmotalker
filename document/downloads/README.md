@@ -8,7 +8,6 @@
 
 | Source            | Count     |
 | ----------------- | --------- |
-| 📦 Without Mirror | —         |
 | 🪞 With Mirror    | **21222** |
 
 ---
