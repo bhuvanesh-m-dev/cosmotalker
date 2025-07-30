@@ -16,7 +16,7 @@
 
 To ensure transparency, all raw JSON data used to generate these stats are stored in this repository:
 
-📂 [`data/pypi_stats_cosmotalker.json`](https://github.com/bhuvaneshm-dev/cosmotalker/blob/main/data/pypi_stats_cosmotalker.json)
+📂 [`with_mirros.json`](https://github.com/bhuvanesh-m-dev/cosmotalker/blob/main/document/downloads/with_mirros.json)
 
 This file contains structured data fetched using the free PyPIStats API.
 
