@@ -33,6 +33,6 @@ PyPI downloads are split into two categories:
 
 This proves that:
 
-✅ CosmoTalker is actively used in **diverse environments** (mirrored installs often occur in corporate, educational, or high-speed cache regions).
-✅ It's compatible with **mirror-based deployments** such as China-based users using Aliyun mirrors.
-✅ The mirror traffic adds a **real-world usage layer** beyond standard `pip install`.
+✅ CosmoTalker is actively used in **diverse environments** (mirrored installs often occur in corporate, educational, or high-speed cache regions).   
+✅ It's compatible with **mirror-based deployments** such as China-based users using Aliyun mirrors.   
+✅ The mirror traffic adds a **real-world usage layer** beyond standard `pip install`.   
