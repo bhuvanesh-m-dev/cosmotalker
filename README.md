@@ -180,3 +180,43 @@ print(cosmotalker.get("earth"))    # Instant data about Earth
 ```bash
 sudo apt update && sudo apt install python3-pip -y && pip3 install cosmotalker
 ```
+
+### 📈 PyPI Downloads Stats
+
+![PyPI - Downloads](https://static.pepy.tech/badge/cosmotalker)  
+**Note:** The above badge shows **lifetime downloads** via [pepy.tech](https://pepy.tech/project/cosmotalker).  
+However, pepy updates downloads based on a rolling 3-month window, which may show slower growth over time.
+
+---
+
+### 🔍 Accurate Stats (Manual + Screenshot Proof)
+
+I manually track and verify download numbers through multiple sources.  
+Below is the manually updated table reflecting actual downloads over time:
+
+| Date       | Total Downloads | Source                    |
+|------------|------------------|---------------------------|
+| 2024-03-15 | 1.2K             | Initial Launch Week       |
+| 2024-06-28 | 21.2K            | Pepy      |
+| 2024-07-29 | ~25K (approx)    | Verified with initial source     |
+
+---
+
+📂 **Proof Screenshots Directory**  
+You can view proof and mirror screenshots from the following URL:  
+➡️ [https://github.com/bhuvanesh-m-dev/cosmotalker/tree/main/document/screenshots](https://github.com/bhuvanesh-m-dev/cosmotalker/tree/main/document/screenshots)
+
+_This directory will be updated periodically with accurate screenshots showing growth, mirror proof (like aliyun, tencent, etc.), and manual logs._
+
+---
+
+### 📎 Additional Sources Used
+
+- [pepy.tech/project/cosmotalker](https://pepy.tech/project/cosmotalker)  
+- [pypistats.org/packages/cosmotalker](https://pypistats.org/packages/cosmotalker)  
+- PyPI mirrors (aliyun, tencent, pypi.python.org analytics)
+
+---
+
+✅ This ensures transparent and trustworthy tracking of **CosmoTalker**'s growth.
+
