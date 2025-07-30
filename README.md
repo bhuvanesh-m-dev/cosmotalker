@@ -1,4 +1,4 @@
-[![PyPI Downloads](https://img.shields.io/badge/estimated--downloads-25k+-blue)]
+![PyPI Downloads](https://img.shields.io/badge/Downloads-25k+-blue)
 ![PyPI](https://img.shields.io/pypi/v/cosmotalker.svg)
 [![Socket Badge](https://socket.dev/api/badge/pypi/package/cosmotalker)](https://socket.dev/pypi/package/cosmotalker)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg )](https://github.com/bhuvanesh-m-dev/cosmotalker/blob/main/document/LICENSE )
