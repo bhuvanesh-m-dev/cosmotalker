@@ -227,3 +227,20 @@ Aliyun PyPI Mirror for CosmoTalker:
 
 ✅ This ensures transparent and trustworthy tracking of **CosmoTalker**'s growth.
 
+---   
+## 💬 Offline Chat with `oolit()`
+
+**CosmoTalker** now includes `oolit()`, a fully offline chat interface.
+
+- **Chat without internet**: Interact with CosmoTalker's knowledge base.
+- **Easy to use**: Just import and run `cosmotalker.oolit()`.
+
+### Example
+```python
+import cosmotalker
+
+cosmotalker.oolit()
+```
+
+---
+
