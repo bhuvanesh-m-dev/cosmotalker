@@ -1,1 +1,258 @@
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: rgba(0, 0, 0, 0.1); /* Very light transparent black */
+    color: #e0e0e0;
+    overflow-x: hidden;
+}
 
+canvas#bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    display: block;
+    pointer-events: none;
+    background: #000;
+}
+
+h1, h2, h3 {
+    font-family: 'Orbitron', sans-serif;
+    color: #e0e0e0;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.8); /* White glow */
+}
+
+/* Custom glow animation for headline to prevent overlap */
+h1.cosmic-glow {
+    animation: cosmic-glow-animate 2s infinite alternate;
+}
+
+@keyframes cosmic-glow-animate {
+    0% { text-shadow: 0 0 15px rgba(255, 255, 255, 0.8); }
+    100% { text-shadow: 0 0 25px rgba(255, 255, 255, 1), 0 0 35px rgba(170, 220, 255, 0.9); }
+}
+
+.section-gradient-bg {
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.05), rgba(200, 230, 255, 0.08), rgba(255, 255, 255, 0.05)); /* Very subtle light transparent gradient */
+}
+
+/* Remove old star background styles */
+/* .star-background, .star, @keyframes twinkle are removed */
+
+/* Button glow effect */
+.btn-glow {
+    transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(170, 220, 255, 0.7); /* Light blue glow */
+}
+
+.btn-glow:hover {
+    box-shadow: 0 0 25px rgba(170, 220, 255, 1), 0 0 35px rgba(170, 220, 255, 0.8);
+    transform: translateY(-2px);
+}
+
+/* Card glow effect */
+.card-glow {
+    position: relative;
+    background-color: rgba(255, 255, 255, 0.08); /* Light transparent white */
+    border: 1px solid rgba(200, 230, 255, 0.2); /* Subtle light blue border */
+    box-shadow: 0 0 20px rgba(170, 220, 255, 0.3); /* Light blue glow */
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.card-glow::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    transform: rotate(45deg);
+    animation: card-rotate 15s linear infinite;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.card-glow:hover::before {
+    opacity: 1;
+}
+
+@keyframes card-rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Make other sections transparent */
+.bg-gray-900 {
+    background-color: rgba(255, 255, 255, 0.05) !important; /* Very light transparent */
+}
+
+.bg-gray-950 {
+    background-color: rgba(255, 255, 255, 0.02) !important; /* Even lighter transparent */
+}
+
+
+/* Terminal simulator styling */
+.terminal-simulator {
+    background-color: rgba(0, 0, 0, 0.6); /* Slightly darker transparent black */
+    border-radius: 8px;
+    padding: 20px;
+    font-family: 'Menlo', 'Monaco', 'Consolas', 'Courier New', monospace;
+    color: #0f0; /* Green text for terminal */
+    white-space: pre-wrap;
+    overflow-x: auto;
+    box-shadow: 0 0 20px rgba(170, 220, 255, 0.5); /* Light blue glow */
+    border: 1px solid rgba(170, 220, 255, 0.5);
+}
+
+.typewriter span {
+    overflow: hidden;
+    border-right: .15em solid orange; /* Blinking cursor */
+    white-space: nowrap;
+    margin: 0 auto;
+    animation: typing 4s steps(40, end), blink-caret .75s step-end infinite;
+}
+
+/* Typing animation */
+@keyframes typing {
+    from { width: 0 }
+    to { width: 100% }
+}
+
+/* Blinking cursor animation */
+@keyframes blink-caret {
+    from, to { border-color: transparent }
+    50% { border-color: orange }
+}
+
+/* Scroll fade-in effect */
+.scroll-fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+.scroll-fade-in.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Responsive styling for badges */
+.badge-container img {
+    max-width: 100%; /* Ensure images don't overflow */
+    height: auto;
+}
+
+/* Specific styling for the Hero section background to ensure it covers the whole height */
+#hero-section {
+    background-size: cover;
+    background-position: center;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    padding-top: 80px; /* Add padding for fixed navbar */
+}
+
+/* Scroll-to-top button styling */
+#scrollToTopBtn {
+    display: none; /* Hidden by default */
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    background: linear-gradient(45deg, #ADD8E6, #87CEEB); /* Light blue to Sky Blue */
+    color: #333; /* Darker text for contrast */
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 0 15px rgba(173, 216, 230, 0.7); /* Light blue glow */
+    transition: all 0.3s ease-in-out;
+    opacity: 0;
+    transform: scale(0.8);
+}
+
+#scrollToTopBtn.show {
+    opacity: 1;
+    transform: scale(1);
+    display: flex;
+}
+
+
+#scrollToTopBtn:hover {
+    background: linear-gradient(45deg, #B0E0E6, #ADD8E6); /* Lighter shades on hover */
+    box-shadow: 0 0 25px rgba(173, 216, 230, 1), 0 0 35px rgba(135, 206, 235, 0.8);
+}
+
+/* Navigation Bar Styling */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.08); /* Light transparent white */
+    backdrop-filter: blur(10px); /* Stronger frosted glass effect */
+    z-index: 100;
+    padding: 1rem 0;
+    box-shadow: 0 2px 15px rgba(170, 220, 255, 0.3); /* Light blue shadow */
+}
+
+.navbar-container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.navbar-link {
+    color: #e0e0e0;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1rem;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    margin-left: 1.5rem;
+    transition: color 0.3s ease, text-shadow 0.3s ease;
+    position: relative;
+}
+
+.navbar-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 50%;
+    background-color: #ADD8E6; /* Light blue underline */
+    transition: width 0.3s ease-out, left 0.3s ease-out;
+}
+
+.navbar-link:hover::after {
+    width: 100%;
+    left: 0;
+}
+
+.navbar-link:hover {
+    color: #ADD8E6; /* Light blue on hover */
+    text-shadow: 0 0 10px #ADD8E6;
+}
+
+/* Mobile adjustments for navbar */
+@media (max-width: 768px) {
+    .navbar-container {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    .navbar-link {
+        margin: 0.5rem 0.8rem;
+    }
+}
