@@ -310,6 +310,9 @@ print(cosmotalker.wiki("black hole"))</code></pre>
             <p class="text-gray-500 text-sm mb-4">
                 Contact: <a href="mailto:bhuvaneshm.developer@gmail.com" class="text-cyan-500 hover:underline">bhuvaneshm.developer@gmail.com</a>
             </p>
+            <p style="color: #6b7280; font-size: 0.875rem; margin-bottom: 1rem;">
+    CosmoTalker's age is : <span id="cosmotalker-age"></span>
+</p>
             <p class="text-gray-500 text-sm">© 2025 Cosmotalker. All rights reserved.</p>
         </div>
     </footer>
@@ -319,5 +322,36 @@ print(cosmotalker.wiki("black hole"))</code></pre>
     </button>
 
     <script src="script.js"></script>
+    <script>
+    // Define the start date and time (March 2, 2025, 11:10:00 AM)
+    // This will be interpreted in the client's local timezone.
+    const startDate = new Date('2025-03-02T11:10:00'); 
+
+    function updateCosmoTalkerAge() {
+        const now = new Date();
+        const diff = now.getTime() - startDate.getTime(); // Difference in milliseconds
+
+        if (diff < 0) {
+            document.getElementById('cosmotalker-age').textContent = "Not yet born!";
+            return;
+        }
+
+        const milliseconds = diff % 1000;
+        const totalSeconds = Math.floor(diff / 1000);
+        const seconds = totalSeconds % 60;
+        const totalMinutes = Math.floor(totalSeconds / 60);
+        const minutes = totalMinutes % 60;
+        const totalHours = Math.floor(totalMinutes / 60);
+        const hours = totalHours % 24;
+        const days = Math.floor(totalHours / 24);
+
+        document.getElementById('cosmotalker-age').textContent =
+            `${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds, ${String(milliseconds).padStart(3, '0')} milliseconds`;
+    }
+
+    // Update the age immediately and then every 10 milliseconds for smooth display
+    updateCosmoTalkerAge();
+    setInterval(updateCosmoTalkerAge, 10);
+</script>
 </body>
 </html>
