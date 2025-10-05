@@ -356,17 +356,17 @@ h1.cosmic-glow {
     }
     
     #hero-section {
-        padding-top: 180px; /* Optimized padding for mobile with taller announcement bar */
-        padding-bottom: 2rem;
+        padding-top: 150px; /* Increased padding for mobile - more gap from navbar */
+        padding-bottom: 1rem;
     }
     
     #hero-section.announcement-hidden {
-        padding-top: 90px; /* Optimized spacing when announcement bar is hidden */
+        padding-top: 70px; /* Increased spacing when announcement bar is hidden */
     }
     
     /* Ensure hero heading is visible on mobile */
     #hero-section h1 {
-        margin-top: 1rem;
+        margin-top: 2rem; /* Increased margin for more gap */
     }
     
     .navbar-container {
