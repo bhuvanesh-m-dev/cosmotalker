@@ -246,7 +246,7 @@ cosmotalker.oolit()
 
 ## License
 
-- **CosmoTalker Python Library:** [MIT License](https://opensource.org/licenses/MIT) © 2025 Bhuvanesh M  
+- **CosmoTalker Python Library:** [MIT License](https://opensource.org/licenses/MIT) © 2025-present Bhuvanesh M  
 - **Solar System Visualization (Orbitarium):** Licensed under [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/)
 
 You may reuse or adapt the Solar System visualization for learning and personal use with credit to the author,  
