@@ -4,6 +4,8 @@
     --primary-color: #4CC9F0;
     --secondary-color: #7209B7;
     --accent-color: #F72585;
+    --eco-green: #2ecc71;
+    /* New Green for Ecosia/Offline */
     --glass-bg: rgba(255, 255, 255, 0.08);
     --glass-border: rgba(255, 255, 255, 0.1);
     --glass-blur: blur(12px);
@@ -45,18 +47,24 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.02);
+    /* More transparent */
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     z-index: 1000;
-    border-bottom: 1px solid var(--glass-border);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
 }
 
 .logo {
     font-size: 1.5rem;
     font-weight: 700;
-    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    background: linear-gradient(90deg, var(--primary-color), var(--eco-green));
+    /* Updated Gradient */
     -webkit-background-clip: text;
+    background-clip: text;
+    /* Standard property */
     -webkit-text-fill-color: transparent;
     letter-spacing: 1px;
 }
@@ -97,7 +105,8 @@ body {
     min-height: 100vh;
     display: flex;
     align-items: center;
-    justify-content: flex-start; /* Align left to balance with Globe usually on right or center */
+    justify-content: flex-start;
+    /* Align left to balance with Globe usually on right or center */
     padding: 0 10%;
     position: relative;
 }
@@ -263,7 +272,8 @@ blockquote {
     text-align: center;
     margin: 2rem 0;
     color: var(--primary-color);
-    font-family: serif; /* Subtle contrast */
+    font-family: serif;
+    /* Subtle contrast */
     font-style: italic;
 }
 
@@ -284,7 +294,21 @@ blockquote {
 
 .offline-mode h3 {
     margin-bottom: 1rem;
-    color: var(--secondary-color);
+    color: var(--eco-green);
+}
+
+.eco-highlight {
+    color: var(--eco-green) !important;
+}
+
+.eco-card img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    margin-bottom: 1rem;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 /* Ecosystem Grid */
@@ -355,7 +379,8 @@ blockquote {
     font-size: 1.2rem;
     font-weight: 600;
     margin-bottom: 0.5rem;
-    color: var(--secondary-color);
+    color: var(--primary-color);
+    /* Was secondary (violet) */
 }
 
 .growth-info {
@@ -366,11 +391,12 @@ blockquote {
 
 /* Footer */
 footer {
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(255, 255, 255, 0.02);
     backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     padding: 4rem 10%;
     text-align: center;
-    border-top: 1px solid var(--glass-border);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .footer-content h2 {
@@ -419,7 +445,10 @@ footer {
 }
 
 @keyframes fadeIn {
-    to { opacity: 1; transform: translateY(0); }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Scroll Reveal Logic */
@@ -438,11 +467,12 @@ footer {
     h1 {
         font-size: 3rem;
     }
-    
+
     .nav-links {
-        display: none; /* Simplify for mobile for now or add burger in prod */
+        display: none;
+        /* Simplify for mobile for now or add burger in prod */
     }
-    
+
     .list-compare {
         flex-direction: column;
         gap: 1rem;
