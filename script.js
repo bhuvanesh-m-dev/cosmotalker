@@ -1,303 +1,147 @@
-// Announcement Bar Auto-Hide Functionality
-(function() {
-    // Wait for DOM to be fully loaded
-    window.addEventListener('DOMContentLoaded', function() {
-        const announcementBar = document.getElementById('announcement-bar');
-        const yasscNavLink = document.getElementById('yassc-nav-link');
-        const navbar = document.querySelector('.navbar');
-        const heroSection = document.getElementById('hero-section');
-        
-        if (!announcementBar || !yasscNavLink || !navbar) {
-            console.warn('Announcement bar elements not found');
-            return;
-        }
-        
-        // Scroll to show hero content properly on page load
-        if (heroSection) {
-            // Small delay to ensure page is fully rendered
-            setTimeout(function() {
-                // Get the height of announcement bar and navbar
-                const announcementHeight = announcementBar.offsetHeight;
-                const navbarHeight = navbar.offsetHeight;
-                const totalHeaderHeight = announcementHeight + navbarHeight;
-                
-                // Scroll to position that accounts for fixed headers
-                const heroPosition = heroSection.getBoundingClientRect().top + window.pageYOffset;
-                const offsetPosition = heroPosition - totalHeaderHeight - 20; // 20px extra buffer
-                
-                window.scrollTo({
-                    top: offsetPosition,
-                    behavior: 'smooth'
-                });
-            }, 300); // Increased delay for mobile rendering
-        }
-        
-        // Add highlight class to YASSC nav link
-        yasscNavLink.classList.add('yassc-highlight');
-        
-        // Set timeout to hide announcement bar after 8 seconds
-        setTimeout(function() {
-            // Add hidden class to announcement bar for smooth fade out
-            announcementBar.classList.add('hidden');
-            
-            // Remove highlight from YASSC nav link
-            yasscNavLink.classList.remove('yassc-highlight');
-            
-            // Move navbar to top position
-            navbar.classList.add('announcement-hidden');
-            
-            // Adjust hero section padding
-            if (heroSection) {
-                heroSection.classList.add('announcement-hidden');
-            }
-        }, 8000); // 8000 milliseconds = 8 seconds
-    });
-})();
-
-// Star background animation
-function createStars() {
-    const starBg = document.getElementById('star-bg');
-    if (!starBg) return;
-    const numStars = 100; // Number of stars
-    for (let i = 0; i < numStars; i++) {
-        let star = document.createElement('div');
-        star.className = 'star';
-        star.style.width = star.style.height = `${Math.random() * 3 + 1}px`;
-        star.style.left = `${Math.random() * 100}%`;
-        star.style.top = `${Math.random() * 100}%`;
-        star.style.animationDelay = `${Math.random() * 5}s`;
-        star.style.animationDuration = `${Math.random() * 3 + 2}s`;
-        starBg.appendChild(star);
-    }
-}
-
-// Copy code to clipboard function
-function copyCode(elementId) {
-    const codeElement = document.getElementById(elementId);
-    if (!codeElement) return;
-    const textToCopy = codeElement.innerText;
-    navigator.clipboard.writeText(textToCopy).then(() => {
-        // Optional: Provide visual feedback like a temporary "Copied!" message
-        const button = codeElement.nextElementSibling;
-        const originalText = button.innerHTML;
-        button.innerHTML = '<i class="fas fa-check mr-1"></i> Copied!';
-        setTimeout(() => {
-            button.innerHTML = originalText;
-        }, 2000);
-    }).catch(err => {
-        console.error('Failed to copy text: ', err);
-    });
-}
-
-// Typewriter effect for terminal simulator
-document.addEventListener('DOMContentLoaded', () => {
-    createStars();
-
-    const typewriterElements = document.querySelectorAll('.typewriter-text');
-    typewriterElements.forEach((element, index) => {
-        const text = element.getAttribute('data-text');
-        element.innerHTML = `<span class="typewriter"></span>`;
-        const span = element.querySelector('.typewriter');
-        let i = 0;
-
-        function type() {
-            if (i < text.length) {
-                span.textContent += text.charAt(i);
-                i++;
-                setTimeout(type, 20); // Adjust typing speed here
-            } else {
-                span.style.borderRight = 'none'; // Remove cursor when done
-            }
-        }
-        // Start typing with a delay for each element
-        setTimeout(type, 1500 * index);
-    });
-
-    // Intersection Observer for scroll-fade-in
-    const fadeInElements = document.querySelectorAll('.scroll-fade-in');
-    const observer = new IntersectionObserver((entries, observer) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('is-visible');
-                observer.unobserve(entry.target);
-            }
-        });
-    }, { threshold: 0.1 });
-
-    fadeInElements.forEach(element => {
-        observer.observe(element);
-    });
-
-    // Scroll-to-top button logic
-    const scrollToTopBtn = document.getElementById("scrollToTopBtn");
-    if (scrollToTopBtn) {
-        window.onscroll = function() {
-            if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
-                scrollToTopBtn.classList.add('show');
-            } else {
-                scrollToTopBtn.classList.remove('show');
-            }
-        };
-
-        scrollToTopBtn.addEventListener("click", function() {
-            window.scrollTo({
-                top: 0,
-                behavior: "smooth"
-            });
-        });
-    }
-});
-
-// --- 3D Space Background with Three.js ---
-
-// Only run if three.js is loaded and canvas exists
-window.addEventListener('DOMContentLoaded', () => {
-    const canvas = document.getElementById('bg');
-    if (!window.THREE || !canvas) return;
-
-    // Scene, Camera, Renderer
+// Main Three.js Logic
+const initGlobe = () => {
+    const container = document.getElementById('canvas-container');
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 2000);
-    camera.position.z = 20;
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setClearColor(0x000000, 1);
 
-    // Resize handler
+    // Renderer
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    container.appendChild(renderer.domElement);
+
+    // Camera
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    // Position camera slightly to the right to leave space for text on the left
+    camera.position.set(0, 0, 1.8);
+
+    // Light
+    const ambientLight = new THREE.AmbientLight(0x333333);
+    scene.add(ambientLight);
+
+    const pointLight = new THREE.PointLight(0xffffff, 1.5);
+    pointLight.position.set(5, 3, 5);
+    scene.add(pointLight);
+
+    // Textures
+    const textureLoader = new THREE.TextureLoader();
+
+    // Earth Group
+    const earthGroup = new THREE.Group();
+    // Tilt the earth
+    earthGroup.rotation.z = -23.4 * Math.PI / 180;
+    scene.add(earthGroup);
+
+    // Earth
+    const earthGeometry = new THREE.SphereGeometry(0.6, 64, 64);
+    const earthMaterial = new THREE.MeshPhongMaterial({
+        map: textureLoader.load('https://raw.githubusercontent.com/ArjunCodess/earth-globe-threejs/main/texture/earthmap.jpeg'),
+        bumpMap: textureLoader.load('https://raw.githubusercontent.com/ArjunCodess/earth-globe-threejs/main/texture/earthbump.jpeg'),
+        bumpScale: 0.05,
+        specularMap: textureLoader.load('https://raw.githubusercontent.com/ArjunCodess/earth-globe-threejs/main/texture/earthmap.jpeg'),
+        specular: new THREE.Color('grey')
+    });
+    const earthMesh = new THREE.Mesh(earthGeometry, earthMaterial);
+    earthGroup.add(earthMesh);
+
+    // Clouds
+    const cloudGeometry = new THREE.SphereGeometry(0.61, 64, 64);
+    const cloudMaterial = new THREE.MeshPhongMaterial({
+        map: textureLoader.load('https://raw.githubusercontent.com/ArjunCodess/earth-globe-threejs/main/texture/earthCloud.png'),
+        transparent: true,
+        opacity: 0.8,
+        blending: THREE.AdditiveBlending,
+        side: THREE.DoubleSide
+    });
+    const cloudMesh = new THREE.Mesh(cloudGeometry, cloudMaterial);
+    earthGroup.add(cloudMesh);
+
+    // Stars (Galaxy Background)
+    const starGeometry = new THREE.SphereGeometry(8, 64, 64);
+    const starMaterial = new THREE.MeshBasicMaterial({
+        map: textureLoader.load('https://raw.githubusercontent.com/ArjunCodess/earth-globe-threejs/main/texture/galaxy.png'),
+        side: THREE.BackSide
+    });
+    const starMesh = new THREE.Mesh(starGeometry, starMaterial);
+    scene.add(starMesh);
+
+    // Mouse Interaction
+    let mouseX = 0;
+    let mouseY = 0;
+    let targetX = 0;
+    let targetY = 0;
+
+    const windowHalfX = window.innerWidth / 2;
+    const windowHalfY = window.innerHeight / 2;
+
+    document.addEventListener('mousemove', (event) => {
+        mouseX = (event.clientX - windowHalfX);
+        mouseY = (event.clientY - windowHalfY);
+    });
+
+    // Scroll Effect
+    let scrollY = 0;
+    window.addEventListener('scroll', () => {
+        scrollY = window.scrollY;
+    });
+
+    // Animation Loop
+    const animate = () => {
+        requestAnimationFrame(animate);
+
+        targetX = mouseX * 0.001;
+        targetY = mouseY * 0.001;
+
+        // Auto rotation
+        earthMesh.rotation.y += 0.002;
+        cloudMesh.rotation.y += 0.0025;
+        cloudMesh.rotation.x += 0.0005;
+
+        // Mouse interaction rotation
+        earthGroup.rotation.y += 0.05 * (targetX - earthGroup.rotation.y);
+        earthGroup.rotation.x += 0.05 * (targetY - earthGroup.rotation.x);
+
+        // Scroll Parallax - Move camera slightly or rotate stars
+        starMesh.rotation.y = scrollY * 0.0002;
+
+        // Optional: Move globe to side on scroll to make room for content
+        // if (scrollY > 100) {
+        //     camera.position.x = THREE.MathUtils.lerp(camera.position.x, 0, 0.05);
+        // } else {
+        //     camera.position.x = THREE.MathUtils.lerp(camera.position.x, 0.5, 0.05);
+        // }
+
+        renderer.render(scene, camera);
+    };
+
+    animate();
+
+    // Resize Handler
     window.addEventListener('resize', () => {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
     });
+};
 
-    // --- Stars ---
-    const starGeometry = new THREE.BufferGeometry();
-    const starCount = 2000;
-    const starVertices = [];
-    for (let i = 0; i < starCount; i++) {
-        const x = (Math.random() - 0.5) * 2000;
-        const y = (Math.random() - 0.5) * 2000;
-        const z = -Math.random() * 2000;
-        starVertices.push(x, y, z);
-    }
-    starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
-    const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 1.2 });
-    const stars = new THREE.Points(starGeometry, starMaterial);
-    scene.add(stars);
-
-    // --- UFO (simple disc + dome) ---
-    const ufoGroup = new THREE.Group();
-    // Disc
-    const discGeometry = new THREE.CylinderGeometry(3, 5, 1, 32, 1, false);
-    const discMaterial = new THREE.MeshPhongMaterial({ color: 0xaaaaaa, shininess: 100 });
-    const disc = new THREE.Mesh(discGeometry, discMaterial);
-    disc.position.y = 0;
-    ufoGroup.add(disc);
-    // Dome
-    const domeGeometry = new THREE.SphereGeometry(2.5, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2);
-    const domeMaterial = new THREE.MeshPhongMaterial({ color: 0x00ffff, transparent: true, opacity: 0.7 });
-    const dome = new THREE.Mesh(domeGeometry, domeMaterial);
-    dome.position.y = 0.5;
-    ufoGroup.add(dome);
-    // Lights
-    const ufoLight = new THREE.PointLight(0x00ffff, 1, 30);
-    ufoLight.position.set(0, 2, 0);
-    ufoGroup.add(ufoLight);
-    ufoGroup.position.set(0, 0, 0);
-    scene.add(ufoGroup);
-
-    // --- Galaxy (spiral) ---
-    function createGalaxy() {
-        const galaxy = new THREE.Group();
-        const arms = 3;
-        const pointsPerArm = 200;
-        for (let a = 0; a < arms; a++) {
-            const armAngle = (a / arms) * Math.PI * 2;
-            for (let i = 0; i < pointsPerArm; i++) {
-                const t = i / pointsPerArm * 6;
-                const r = 10 + i * 0.08;
-                const x = Math.cos(armAngle + t) * r + (Math.random() - 0.5) * 1.5;
-                const y = (Math.random() - 0.5) * 1.5;
-                const z = Math.sin(armAngle + t) * r + (Math.random() - 0.5) * 1.5;
-                const starGeo = new THREE.SphereGeometry(0.12, 6, 6);
-                const starMat = new THREE.MeshBasicMaterial({ color: 0xffeedd });
-                const star = new THREE.Mesh(starGeo, starMat);
-                star.position.set(x, y, z);
-                galaxy.add(star);
+// Scroll Reveal Animation
+const initScrollReveal = () => {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('active');
             }
-        }
-        galaxy.position.set(-30, 20, -200);
-        return galaxy;
-    }
-    scene.add(createGalaxy());
-
-    // --- Nebula (colored foggy sphere) ---
-    function createNebula() {
-        const nebulaGeometry = new THREE.SphereGeometry(8, 32, 32);
-        const nebulaMaterial = new THREE.MeshPhongMaterial({
-            color: 0x8844ff,
-            transparent: true,
-            opacity: 0.18,
-            shininess: 80,
-            emissive: 0x4422aa,
-            emissiveIntensity: 0.7
         });
-        const nebula = new THREE.Mesh(nebulaGeometry, nebulaMaterial);
-        nebula.position.set(40, -10, -300);
-        return nebula;
-    }
-    scene.add(createNebula());
+    }, {
+        threshold: 0.1
+    });
 
-    // --- Black Hole (dark sphere with glow) ---
-    function createBlackHole() {
-        const group = new THREE.Group();
-        // Core
-        const coreGeometry = new THREE.SphereGeometry(3, 32, 32);
-        const coreMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
-        const core = new THREE.Mesh(coreGeometry, coreMaterial);
-        group.add(core);
-        // Glow (accretion disk)
-        const diskGeometry = new THREE.TorusGeometry(5, 0.7, 16, 100);
-        const diskMaterial = new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 0.5 });
-        const disk = new THREE.Mesh(diskGeometry, diskMaterial);
-        disk.rotation.x = Math.PI / 2;
-        group.add(disk);
-        group.position.set(0, -30, -400);
-        return group;
-    }
-    scene.add(createBlackHole());
+    document.querySelectorAll('.scroll-reveal').forEach((el) => {
+        observer.observe(el);
+    });
+};
 
-    // --- Lighting ---
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-    scene.add(ambientLight);
-    const dirLight = new THREE.DirectionalLight(0xffffff, 0.7);
-    dirLight.position.set(10, 20, 10);
-    scene.add(dirLight);
-
-    // --- Animation Loop ---
-    let ufoAngle = 0;
-    function animate() {
-        requestAnimationFrame(animate);
-        // Move camera forward
-        camera.position.z -= 0.5;
-        if (camera.position.z < -1000) camera.position.z = 20;
-        // UFO movement
-        ufoAngle += 0.01;
-        ufoGroup.position.x = Math.sin(ufoAngle) * 10;
-        ufoGroup.position.y = Math.cos(ufoAngle) * 2;
-        ufoGroup.rotation.y += 0.01;
-        // Animate stars (move forward)
-        let positions = starGeometry.attributes.position.array;
-        for (let i = 2; i < positions.length; i += 3) {
-            positions[i] += 2.5; // Move z forward
-            if (positions[i] > camera.position.z) {
-                positions[i] = -2000;
-                positions[i - 2] = (Math.random() - 0.5) * 2000;
-                positions[i - 1] = (Math.random() - 0.5) * 2000;
-            }
-        }
-        starGeometry.attributes.position.needsUpdate = true;
-        renderer.render(scene, camera);
-    }
-    animate();
+// Initialize
+window.addEventListener('DOMContentLoaded', () => {
+    initGlobe();
+    initScrollReveal();
 });
