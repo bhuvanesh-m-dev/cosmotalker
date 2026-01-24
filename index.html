@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,6 +14,7 @@
     <!-- Three.js -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.160/build/three.min.js"></script>
 </head>
+
 <body>
     <!-- 3D Background Container -->
     <div id="canvas-container"></div>
@@ -35,7 +37,8 @@
         <section class="hero">
             <div class="hero-content">
                 <h1 class="fade-in">The Universe, Simplified.</h1>
-                <p class="subtitle fade-in-delay">A friendly guide that explains space to everyone—no science degree required.</p>
+                <p class="subtitle fade-in-delay">A friendly guide that explains space to everyone—no science degree
+                    required.</p>
                 <div class="cta-group fade-in-delay-2">
                     <a href="https://pypi.org/project/cosmotalker/" target="_blank" class="btn-glow">Get Started 🚀</a>
                     <a href="#about" class="btn-outline">Learn More</a>
@@ -47,15 +50,27 @@
         <section id="about" class="content-section">
             <div class="glass-card scroll-reveal">
                 <h2>🌌 What is CosmoTalker?</h2>
-                <p>CosmoTalker is your friendly space guide, designed to make the universe understandable and enjoyable for everyone.</p>
+                <p>CosmoTalker is your friendly space guide, designed to make the universe understandable and enjoyable
+                    for everyone.</p>
                 <div class="feature-grid">
                     <div class="feature-item">🌍 Planets</div>
                     <div class="feature-item">🌕 The Moon</div>
                     <div class="feature-item">🌞 The Sun</div>
                     <div class="feature-item">🌌 Stars & Galaxies</div>
                     <div class="feature-item">🚀 Space Missions</div>
+                    <div class="feature-item">📚 Real-time Wikipedia Search</div>
                 </div>
-                <p class="highlight-text">You don’t need to be a scientist. You don’t need to know computers. If you are curious, CosmoTalker is for you 💫</p>
+                <p class="highlight-text">You don’t need to be a scientist. You don’t need to know computers. If you are
+                    curious, CosmoTalker is for you 💫</p>
+
+                <div style="margin-top: 2rem; background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: 15px;">
+                    <h3 style="color: var(--primary-color); margin-bottom: 0.5rem; font-size: 1.3rem;">🧠 Powered by
+                        Python & Wikipedia</h3>
+                    <p style="font-size: 1rem; margin-bottom: 0;">CosmoTalker features a powerful built-in engine that
+                        connects to <strong>Wikipedia in real-time</strong>. By using advanced Python integrations, it
+                        surfs the web to bring you the latest, most accurate space knowledge instantly—expanding your
+                        universe beyond just static data.</p>
+                </div>
             </div>
         </section>
 
@@ -93,21 +108,58 @@
             </div>
         </section>
 
-        <!-- Offline Section -->
+        <!-- Offline Section & Ecosia -->
         <section id="offline" class="content-section">
             <div class="glass-card scroll-reveal">
                 <h2>🌍 No Internet? No Problem.</h2>
                 <div class="offline-grid">
                     <div class="offline-mode">
-                        <h3>📡 With Internet</h3>
+                        <h3 class="eco-highlight">📡 With Internet</h3>
                         <p>See stunning space images and get latest updates.</p>
                     </div>
                     <div class="offline-mode">
-                        <h3>🚫 Without Internet</h3>
+                        <h3 class="eco-highlight">🚫 Without Internet</h3>
                         <p>Still learn facts, history, and ideas anytime, anywhere.</p>
                     </div>
                 </div>
                 <p class="small-note">Perfect for schools, villages, and remote learning. Learning never stops. 🌱</p>
+
+                <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 2rem 0;">
+
+                <!-- Ecosia Integration -->
+                <div class="ecosia-section">
+                    <h2 class="eco-highlight">🌱 CosmoTalker Uses Ecosia Search</h2>
+                    <p>CosmoTalker has a built-in search feature that can use <strong>Ecosia</strong> — a special search
+                        engine that plants trees every time someone searches the web.</p>
+
+                    <h3 class="eco-highlight">What is Ecosia?</h3>
+                    <p>Ecosia is a search engine just like Google or Bing, but with a beautiful twist: it uses most of
+                        its profits to plant trees and fight climate change. When people search the internet using
+                        Ecosia, the money made from ads goes into real tree-planting projects around the world. 🌳🌍</p>
+
+                    <p>As of now, Ecosia has helped fund the planting of hundreds of millions of trees in places that
+                        need forests and green life the most — helping restore ecosystems, absorb carbon dioxide, and
+                        support people and wildlife.</p>
+
+                    <h3 class="eco-highlight">Why this matters:</h3>
+                    <ul class="no-icon">
+                        <li>🌿 Every time someone uses the CosmoTalker search feature with Ecosia, they are contributing
+                            to tree planting and a greener planet.</li>
+                        <li>🌎 This means CosmoTalker is not only about learning space — it also supports positive
+                            environmental action here on Earth.</li>
+                    </ul>
+
+                    <blockquote style="font-size: 1.2rem; margin-top: 1rem;">
+                        "CosmoTalker helps you learn and explore and helps plant trees when you search — because its
+                        search uses Ecosia, the search engine that gives back to the planet."
+                    </blockquote>
+
+                    <div style="text-align: center; margin-top: 2rem;">
+                        <a href="https://blog.ecosia.org/tag/where-does-ecosia-plant-trees/" target="_blank"
+                            class="btn-primary" style="background: var(--eco-green); color: white !important;">Learn
+                            about Ecosia's Impact 🌳</a>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -118,7 +170,8 @@
                 <p>CosmoTalker is part of a bigger family of tools:</p>
                 <div class="ecosystem-grid">
                     <div class="eco-card">
-                        <span class="emoji">🗣️</span>
+                        <img src="https://camo.githubusercontent.com/f962252b56ce7b3502cee52af30c5a94a3868042521af99169bfba9e443f752b/68747470733a2f2f62687576616e6573682d6d2d6465762e6769746875622e696f2f696d672f636f736d6f74616c6b65722e706e67"
+                            alt="CosmoTalker">
                         <h3>CosmoTalker</h3>
                         <p>Explains space in words</p>
                     </div>
@@ -138,12 +191,14 @@
                         <p>Friendly AI OS</p>
                     </div>
                     <div class="eco-card">
-                        <span class="emoji">🤖</span>
+                        <img src="https://raw.githubusercontent.com/bhuvanesh-m-dev/pyllamaui/refs/heads/main/PyLlamaUI.png"
+                            alt="PyLlamaUI">
                         <h3>PyLlamaUI</h3>
                         <p>Local AI Chat</p>
                     </div>
                     <div class="eco-card">
-                        <span class="emoji">🧰</span>
+                        <img src="https://raw.githubusercontent.com/bhuvanesh-m-dev/setbian/refs/heads/main/setbian.png"
+                            alt="Setbian">
                         <h3>Setbian</h3>
                         <p>Linux Simplified</p>
                     </div>
@@ -169,7 +224,8 @@
                 </div>
                 <div class="growth-info">
                     <h3>🚀 Growing Every Day</h3>
-                    <p>With an official website and continuous updates, CosmoTalker is built to last and help learners for years to come.</p>
+                    <p>With an official landing webpage and continuous updates, CosmoTalker is built to last and help
+                        learners for years to come.</p>
                 </div>
             </div>
         </section>
@@ -192,4 +248,5 @@
 
     <script src="script.js"></script>
 </body>
+
 </html>
