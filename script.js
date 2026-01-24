@@ -15,10 +15,10 @@ const initGlobe = () => {
     camera.position.set(0, 0, 1.8);
 
     // Light
-    const ambientLight = new THREE.AmbientLight(0x333333);
+    const ambientLight = new THREE.AmbientLight(0x666666); // Brighter ambient
     scene.add(ambientLight);
 
-    const pointLight = new THREE.PointLight(0xffffff, 1.5);
+    const pointLight = new THREE.PointLight(0xffffff, 2.0); // Brighter point light
     pointLight.position.set(5, 3, 5);
     scene.add(pointLight);
 
@@ -54,6 +54,25 @@ const initGlobe = () => {
     });
     const cloudMesh = new THREE.Mesh(cloudGeometry, cloudMaterial);
     earthGroup.add(cloudMesh);
+
+    // Moon
+    const moonGroup = new THREE.Group();
+    scene.add(moonGroup); // Independent group for orbit
+
+    const moonGeometry = new THREE.SphereGeometry(0.16, 64, 64); // ~1/4 size of Earth
+    const moonMaterial = new THREE.MeshPhongMaterial({
+        map: textureLoader.load('https://raw.githubusercontent.com/bhuvanesh-m-dev/cosmotalker/main/docs/img/moonmap4k.jpg'),
+        // Fallback or generic moon texture if specific one fails, but using a standard one is safer. 
+        // Using a reliable public URL for now.
+        map: textureLoader.load('https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/FullMoon2010.jpg/1024px-FullMoon2010.jpg'),
+        // Actually, wikimedia is a flat image, let's use a texture map designed for spheres if possible, or the one from the same github source if available.
+        // The one used for Earth was from ArjunCodess. Checking if they have moon.
+        // Alternative reliable source: 
+        map: textureLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/moon_1024.jpg')
+    });
+    const moonMesh = new THREE.Mesh(moonGeometry, moonMaterial);
+    moonMesh.position.set(2, 0, 0); // Distance from Earth
+    moonGroup.add(moonMesh);
 
     // Stars (Galaxy Background)
     const starGeometry = new THREE.SphereGeometry(8, 64, 64);
@@ -95,6 +114,10 @@ const initGlobe = () => {
         earthMesh.rotation.y += 0.002;
         cloudMesh.rotation.y += 0.0025;
         cloudMesh.rotation.x += 0.0005;
+
+        // Moon Orbit
+        moonGroup.rotation.y += 0.005;
+        moonMesh.rotation.y += 0.01; // Moon's own rotation
 
         // Mouse interaction rotation
         earthGroup.rotation.y += 0.05 * (targetX - earthGroup.rotation.y);
@@ -141,7 +164,11 @@ const initScrollReveal = () => {
 };
 
 // Initialize
-window.addEventListener('DOMContentLoaded', () => {
-    initGlobe();
-    initScrollReveal();
+document.addEventListener('DOMContentLoaded', () => {
+    // Small delay to ensure layout is computed, though usually not needed.
+    // It helps with some browser renders to not block the main thread immediately.
+    setTimeout(() => {
+        initGlobe();
+        initScrollReveal();
+    }, 100);
 });
