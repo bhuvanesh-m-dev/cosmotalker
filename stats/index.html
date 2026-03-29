@@ -2,598 +2,775 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>CosmoTalker • Galactic Download Analytics</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CosmoTalker • Download Stats (Under Testing)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      background: #05070c;
+      background: #000;
       font-family: 'Inter', 'Space Grotesk', sans-serif;
-      overflow-x: hidden;
-      color: #f0f3fa;
+      overflow: hidden;
+      color: #fff;
+      min-height: 100vh;
       position: relative;
     }
-    .stars {
+
+    /* Deep Space Background */
+    .space-bg {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      pointer-events: none;
+      background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
       z-index: 0;
-      background: radial-gradient(ellipse at 20% 30%, #0a0f1a, #030507);
     }
+
+    /* Animated Stars */
+    .stars-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
     .star {
       position: absolute;
-      background-color: white;
+      background: white;
       border-radius: 50%;
-      opacity: 0;
-      animation: twinkle 3s infinite alternate;
+      animation: twinkle var(--duration) ease-in-out infinite;
+      opacity: var(--opacity);
     }
+
     @keyframes twinkle {
-      0% { opacity: 0.2; transform: scale(1);}
-      100% { opacity: 1; transform: scale(1.2);}
+      0%, 100% { opacity: var(--opacity); transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.2); }
     }
+
+    /* Shooting Stars */
+    .shooting-star {
+      position: absolute;
+      width: 100px;
+      height: 2px;
+      background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 50%, rgba(255,255,255,0) 100%);
+      animation: shoot 3s linear infinite;
+      opacity: 0;
+      z-index: 2;
+    }
+
+    @keyframes shoot {
+      0% { transform: translateX(-100px) translateY(100px) rotate(-45deg); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateX(calc(100vw + 100px)) translateY(calc(-100vh - 100px)) rotate(-45deg); opacity: 0; }
+    }
+
+    /* Nebula Effects */
     .nebula {
       position: fixed;
-      width: 70vw;
-      height: 70vw;
-      background: radial-gradient(circle, rgba(88,166,255,0.15) 0%, rgba(192,132,252,0.05) 70%);
       border-radius: 50%;
       filter: blur(80px);
-      top: -20%;
-      right: -20%;
-      z-index: 0;
+      opacity: 0.4;
+      z-index: 1;
+      animation: float 20s ease-in-out infinite;
+    }
+
+    .nebula-1 {
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(88,166,255,0.4) 0%, transparent 70%);
+      top: -200px;
+      right: -200px;
+      animation-delay: 0s;
+    }
+
+    .nebula-2 {
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(192,132,252,0.4) 0%, transparent 70%);
+      bottom: -150px;
+      left: -150px;
+      animation-delay: -5s;
+    }
+
+    .nebula-3 {
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(56,189,248,0.3) 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation-delay: -10s;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(30px, -30px) scale(1.1); }
+      66% { transform: translate(-20px, 20px) scale(0.9); }
+    }
+
+    /* Planet Decorations */
+    .planet {
+      position: fixed;
+      border-radius: 50%;
+      z-index: 2;
       pointer-events: none;
-      animation: floatNebula 20s infinite alternate;
     }
-    .nebula2 {
-      left: -30%;
-      bottom: -10%;
-      top: auto;
-      background: radial-gradient(circle, rgba(192,132,252,0.12) 0%, rgba(59,130,246,0.04) 80%);
-      animation: floatNebula2 25s infinite alternate;
+
+    .planet-1 {
+      width: 120px;
+      height: 120px;
+      background: radial-gradient(circle at 30% 30%, #ff6b6b, #c92a2a);
+      box-shadow: 0 0 60px rgba(255,107,107,0.4), inset -20px -20px 40px rgba(0,0,0,0.5);
+      top: 15%;
+      right: 10%;
+      animation: orbit 30s linear infinite;
     }
-    @keyframes floatNebula {
-      0% { transform: translate(0, 0) scale(1); opacity: 0.5; }
-      100% { transform: translate(5%, 5%) scale(1.1); opacity: 0.8; }
+
+    .planet-2 {
+      width: 80px;
+      height: 80px;
+      background: radial-gradient(circle at 30% 30%, #4ecdc4, #087f5b);
+      box-shadow: 0 0 40px rgba(78,205,196,0.4), inset -15px -15px 30px rgba(0,0,0,0.5);
+      bottom: 20%;
+      left: 8%;
+      animation: orbit 25s linear infinite reverse;
     }
-    @keyframes floatNebula2 {
-      0% { transform: translate(0, 0) scale(1); }
-      100% { transform: translate(-4%, 6%) scale(1.15); }
+
+    .planet-3 {
+      width: 60px;
+      height: 60px;
+      background: radial-gradient(circle at 30% 30%, #ffe66d, #f59f00);
+      box-shadow: 0 0 30px rgba(255,230,109,0.4), inset -10px -10px 20px rgba(0,0,0,0.5);
+      top: 60%;
+      right: 15%;
+      animation: pulse 4s ease-in-out infinite;
     }
-    .dashboard {
+
+    @keyframes orbit {
+      from { transform: rotate(0deg) translateX(20px) rotate(0deg); }
+      to { transform: rotate(360deg) translateX(20px) rotate(-360deg); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    /* Rings around planet */
+    .planet-ring {
+      position: absolute;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotateX(75deg);
+    }
+
+    .planet-1 .planet-ring {
+      width: 180px;
+      height: 180px;
+      animation: spin-ring 20s linear infinite;
+    }
+
+    @keyframes spin-ring {
+      from { transform: translate(-50%, -50%) rotateX(75deg) rotateZ(0deg); }
+      to { transform: translate(-50%, -50%) rotateX(75deg) rotateZ(360deg); }
+    }
+
+    /* Main Container */
+    .container {
       position: relative;
       z-index: 10;
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 2rem 2rem 4rem;
-    }
-    .hero {
-      text-align: center;
-      margin-bottom: 3rem;
-      backdrop-filter: blur(12px);
-      background: rgba(10, 20, 30, 0.3);
-      border-radius: 3rem;
-      padding: 2rem 1rem;
-      border: 1px solid rgba(88, 166, 255, 0.25);
-    }
-    .hero h1 {
-      font-size: 4.2rem;
-      font-weight: 800;
-      background: linear-gradient(125deg, #ffffff, #a5f0ff, #c084fc, #60a5fa);
-      background-size: 300% 300%;
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      animation: gradientShift 8s ease infinite;
-    }
-    @keyframes gradientShift {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-    .badge-group {
+      min-height: 100vh;
       display: flex;
-      gap: 12px;
-      justify-content: center;
-      margin-top: 1.5rem;
-      flex-wrap: wrap;
-    }
-    .cosmic-badge {
-      background: rgba(20, 30, 55, 0.6);
-      backdrop-filter: blur(8px);
-      padding: 0.5rem 1.2rem;
-      border-radius: 40px;
-      font-size: 0.85rem;
-      border: 1px solid rgba(96, 165, 250, 0.5);
-    }
-    /* Main Hero Stats Card */
-    .hero-stats {
-      background: linear-gradient(135deg, rgba(88,166,255,0.2), rgba(192,132,252,0.2));
-      backdrop-filter: blur(16px);
-      border-radius: 3rem;
-      padding: 2.5rem;
-      margin: 2rem 0;
-      text-align: center;
-      border: 1px solid rgba(88,166,255,0.5);
-      box-shadow: 0 0 40px rgba(88,166,255,0.3);
-    }
-    .hero-stats .big-number {
-      font-size: 6rem;
-      font-weight: 800;
-      background: linear-gradient(135deg, #fff, #90caf9);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      letter-spacing: -3px;
-    }
-    .hero-stats .big-label {
-      font-size: 1.2rem;
-      opacity: 0.9;
-      margin-top: 0.5rem;
-    }
-    .asterisk-note {
-      font-size: 0.75rem;
-      opacity: 0.7;
-      margin-top: 1rem;
-      font-family: monospace;
-    }
-    /* Time Range Grid */
-    .time-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1.5rem;
-      margin: 2rem 0;
-    }
-    .time-card {
-      background: rgba(12, 18, 28, 0.7);
-      backdrop-filter: blur(16px);
-      border-radius: 1.5rem;
-      padding: 1.2rem;
-      border: 1px solid rgba(88,166,255,0.3);
-      transition: all 0.3s;
-    }
-    .time-card:hover {
-      transform: translateY(-5px);
-      border-color: #58a6ff;
-    }
-    .time-title {
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
-      display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 8px;
-      color: #90caf9;
+      justify-content: center;
+      padding: 2rem;
+      text-align: center;
     }
-    .dual-stats {
+
+    /* Logo/Rocket Icon */
+    .rocket-container {
+      position: relative;
+      margin-bottom: 2rem;
+    }
+
+    .rocket {
+      font-size: 5rem;
+      background: linear-gradient(135deg, #60a5fa, #c084fc, #f472b6);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: float-rocket 3s ease-in-out infinite;
+      filter: drop-shadow(0 0 30px rgba(96,165,250,0.5));
+    }
+
+    @keyframes float-rocket {
+      0%, 100% { transform: translateY(0) rotate(-5deg); }
+      50% { transform: translateY(-20px) rotate(5deg); }
+    }
+
+    .orbit-ring {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 150px;
+      height: 150px;
+      border: 2px dashed rgba(255,255,255,0.2);
+      border-radius: 50%;
+      animation: spin 10s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: translate(-50%, -50%) rotate(0deg); }
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    /* Title */
+    .title {
+      font-size: 4rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, #fff 0%, #a5f0ff 50%, #c084fc 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      letter-spacing: -0.02em;
+      text-shadow: 0 0 40px rgba(96,165,250,0.3);
+    }
+
+    .subtitle {
+      font-size: 1.5rem;
+      color: #94a3b8;
+      margin-bottom: 3rem;
+      font-weight: 300;
+    }
+
+    /* Testing Badge */
+    .testing-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: rgba(251, 191, 36, 0.15);
+      border: 1px solid rgba(251, 191, 36, 0.5);
+      padding: 1rem 2rem;
+      border-radius: 50px;
+      margin-bottom: 3rem;
+      backdrop-filter: blur(10px);
+      animation: pulse-badge 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-badge {
+      0%, 100% { box-shadow: 0 0 20px rgba(251,191,36,0.2); }
+      50% { box-shadow: 0 0 40px rgba(251,191,36,0.4); }
+    }
+
+    .testing-badge i {
+      color: #fbbf24;
+      font-size: 1.5rem;
+      animation: spin-slow 3s linear infinite;
+    }
+
+    @keyframes spin-slow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .testing-badge span {
+      color: #fbbf24;
+      font-weight: 600;
+      font-size: 1.1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    /* Message Card */
+    .message-card {
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(88, 166, 255, 0.3);
+      border-radius: 2rem;
+      padding: 3rem;
+      max-width: 600px;
+      margin-bottom: 3rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .message-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+      transition: left 0.8s;
+    }
+
+    .message-card:hover::before {
+      left: 100%;
+    }
+
+    .message-card p {
+      font-size: 1.25rem;
+      line-height: 1.8;
+      color: #e2e8f0;
+      margin-bottom: 1rem;
+    }
+
+    .message-card .highlight {
+      background: linear-gradient(135deg, #60a5fa, #c084fc);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      font-weight: 600;
+    }
+
+    /* Cosmic Decorations in Card */
+    .cosmic-dots {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .cosmic-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      animation: bounce 1.4s ease-in-out infinite both;
+    }
+
+    .cosmic-dot:nth-child(1) {
+      background: #60a5fa;
+      animation-delay: -0.32s;
+    }
+
+    .cosmic-dot:nth-child(2) {
+      background: #c084fc;
+      animation-delay: -0.16s;
+    }
+
+    .cosmic-dot:nth-child(3) {
+      background: #f472b6;
+      animation-delay: 0s;
+    }
+
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+
+    /* Action Buttons */
+    .actions {
       display: flex;
       gap: 1rem;
-      justify-content: space-between;
+      flex-wrap: wrap;
+      justify-content: center;
     }
-    .stat-box {
-      flex: 1;
-      text-align: center;
-      padding: 0.8rem;
-      background: rgba(0,0,0,0.3);
-      border-radius: 1rem;
-    }
-    .stat-box .label {
-      font-size: 0.7rem;
-      opacity: 0.7;
-      text-transform: uppercase;
-    }
-    .stat-box .value {
-      font-size: 1.6rem;
-      font-weight: 700;
-      font-family: monospace;
-    }
-    .stat-box.mirror .value { color: #c084fc; }
-    .stat-box.direct .value { color: #60a5fa; }
-    .insight-galaxy {
-      background: rgba(8, 14, 23, 0.6);
-      backdrop-filter: blur(12px);
-      border-radius: 2rem;
-      padding: 1.8rem;
-      margin: 2rem 0;
-      border: 1px solid rgba(88,166,255,0.4);
-    }
-    .chart-header {
-      display: flex;
-      justify-content: space-between;
+
+    .cosmic-btn {
+      display: inline-flex;
       align-items: center;
-      flex-wrap: wrap;
-      margin-bottom: 1.5rem;
-    }
-    .range-selector {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    .range-btn {
-      background: rgba(88,166,255,0.2);
-      border: 1px solid #58a6ff;
-      border-radius: 30px;
-      padding: 0.3rem 1rem;
+      gap: 0.75rem;
+      padding: 1rem 2rem;
+      border-radius: 50px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      border: none;
       cursor: pointer;
-      font-size: 0.8rem;
-      transition: 0.2s;
+      font-size: 1rem;
+      position: relative;
+      overflow: hidden;
     }
-    .range-btn.active {
-      background: #58a6ff;
-      color: white;
-    }
-    .range-btn:hover {
-      background: #58a6ff60;
-    }
-    canvas {
-      max-height: 350px;
+
+    .cosmic-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
       width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
     }
-    .refresh-btn {
-      background: rgba(88,166,255,0.2);
-      border: 1px solid #58a6ff;
-      border-radius: 40px;
-      padding: 0.5rem 1.3rem;
-      cursor: pointer;
-      transition: 0.2s;
+
+    .cosmic-btn:hover::before {
+      left: 100%;
     }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      color: white;
+      box-shadow: 0 10px 30px -10px rgba(59,130,246,0.5);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 20px 40px -10px rgba(59,130,246,0.6);
+    }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.1);
+      color: #e2e8f0;
+      border: 1px solid rgba(255,255,255,0.2);
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.2);
+      transform: translateY(-3px);
+    }
+
+    /* Footer */
     .cosmic-footer {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
       text-align: center;
-      margin-top: 3rem;
-      font-size: 0.8rem;
-      opacity: 0.7;
+      z-index: 10;
+      color: #64748b;
+      font-size: 0.9rem;
     }
-    .loader-spiral {
-      display: inline-block;
-      width: 24px;
-      height: 24px;
-      border: 2px solid rgba(88,166,255,0.3);
-      border-top-color: #58a6ff;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
+
+    .cosmic-footer i {
+      color: #ef4444;
+      animation: heartbeat 1.5s ease-in-out infinite;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    @media (max-width: 780px) {
-      .hero h1 { font-size: 2.5rem; }
-      .hero-stats .big-number { font-size: 3.5rem; }
-      .dual-stats { flex-direction: column; }
+
+    @keyframes heartbeat {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+
+    /* Constellation Lines */
+    .constellation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+      opacity: 0.3;
+    }
+
+    .constellation-line {
+      stroke: rgba(255,255,255,0.2);
+      stroke-width: 1;
+      fill: none;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .title { font-size: 2.5rem; }
+      .subtitle { font-size: 1.1rem; }
+      .message-card { padding: 2rem; margin: 0 1rem 2rem; }
+      .message-card p { font-size: 1rem; }
+      .rocket { font-size: 3.5rem; }
+      .planet-1 { width: 80px; height: 80px; }
+      .planet-2 { width: 60px; height: 60px; }
+      .planet-3 { width: 40px; height: 40px; }
+    }
+
+    /* Loading Animation Overlay */
+    .warp-speed {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 100;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.8s ease, visibility 0.8s;
+    }
+
+    .warp-speed.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .warp-text {
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #60a5fa, #c084fc);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: warp-pulse 1s ease-in-out infinite;
+    }
+
+    @keyframes warp-pulse {
+      0%, 100% { opacity: 0.5; transform: scale(0.95); }
+      50% { opacity: 1; transform: scale(1.05); }
     }
   </style>
 </head>
 <body>
-<div class="stars" id="starfield"></div>
-<div class="nebula"></div>
-<div class="nebula nebula2"></div>
-
-<div class="dashboard">
-  <div class="hero">
-    <h1><i class="fas fa-rocket"></i> CosmoTalker <span>✦</span> Galactic Analytics</h1>
-    <div class="badge-group">
-      <div class="cosmic-badge"><i class="fab fa-python"></i> PyPI Package</div>
-      <div class="cosmic-badge"><i class="fas fa-chart-line"></i> Mirror + Direct Stats</div>
-      <div class="cosmic-badge"><i class="fas fa-infinity"></i> Lifetime Tracking</div>
-    </div>
+  <!-- Warp Speed Loading Overlay -->
+  <div class="warp-speed" id="warpOverlay">
+    <div class="warp-text"><i class="fas fa-rocket"></i> Entering Orbit...</div>
   </div>
 
-  <!-- Main Hero Card with 75K+ Downloads -->
-  <div class="hero-stats">
-    <div class="big-number" id="totalDownloadsHero">75,000+</div>
-    <div class="big-label"><i class="fas fa-download"></i> Total Downloads (Lifetime)</div>
-    <div class="asterisk-note">
-      <i class="fas fa-asterisk"></i> *Combined total including both direct PyPI downloads and mirror/CDN downloads.<br>
-      Mirror downloads represent regional cache servers, CDNs, and third-party mirrors.
-    </div>
-  </div>
+  <!-- Background Elements -->
+  <div class="space-bg"></div>
+  <div class="stars-container" id="starsContainer"></div>
+  
+  <!-- Constellation SVG -->
+  <svg class="constellation" id="constellation">
+    <!-- Lines will be drawn by JS -->
+  </svg>
 
-  <!-- Time Range Stats: 3mo, 6mo, 1yr, Lifetime with Direct + Mirror split -->
-  <div class="time-grid" id="timeStatsGrid">
-    <!-- Will be populated by JS -->
-  </div>
+  <!-- Nebula Effects -->
+  <div class="nebula nebula-1"></div>
+  <div class="nebula nebula-2"></div>
+  <div class="nebula nebula-3"></div>
 
-  <!-- Comparison Charts: With Mirror vs Without Mirror -->
-  <div class="insight-galaxy">
-    <div class="chart-header">
-      <div><i class="fas fa-chart-line" style="color:#58a6ff"></i> <strong>Download Trends</strong> — With Mirrors vs Without Mirrors</div>
-      <div class="range-selector" id="chartRangeSelector">
-        <button class="range-btn" data-range="30">Last 30 Days</button>
-        <button class="range-btn" data-range="90">Last 90 Days</button>
-        <button class="range-btn" data-range="120">Last 120 Days</button>
-        <button class="range-btn" data-range="365">Last 1 Year</button>
-        <button class="range-btn active" data-range="lifetime">Lifetime</button>
+  <!-- Planets -->
+  <div class="planet planet-1">
+    <div class="planet-ring"></div>
+  </div>
+  <div class="planet planet-2"></div>
+  <div class="planet planet-3"></div>
+
+  <!-- Main Content -->
+  <div class="container">
+    <!-- Rocket Icon -->
+    <div class="rocket-container">
+      <div class="orbit-ring"></div>
+      <div class="rocket">
+        <i class="fas fa-rocket"></i>
       </div>
     </div>
-    <canvas id="comparisonChart" style="width:100%; max-height: 380px;"></canvas>
-    <div style="font-size: 0.7rem; text-align: center; margin-top: 12px;">
-      <span style="color:#60a5fa">●</span> With Mirrors (includes CDN + regional) &nbsp;&nbsp;
-      <span style="color:#c084fc">●</span> Without Mirrors (direct PyPI only)
+
+    <!-- Title -->
+    <h1 class="title">CosmoTalker</h1>
+    <p class="subtitle">Download Statistics Portal</p>
+
+    <!-- Testing Badge -->
+    <div class="testing-badge">
+      <i class="fas fa-cog"></i>
+      <span>Under Testing</span>
+    </div>
+
+    <!-- Message Card -->
+    <div class="message-card">
+      <p>Thank you for visiting the <span class="highlight">CosmoTalker Download Stats</span> page!</p>
+      <p>CosmoTalker's ecosystem currently calibrating our interstellar telemetry systems to bring you accurate download analytics from across the galaxy.</p>
+      <p style="margin-bottom: 0; font-size: 1rem; color: #94a3b8;">Please check back soon as we finalize our cosmic data streams.</p>
+      
+      <div class="cosmic-dots">
+        <div class="cosmic-dot"></div>
+        <div class="cosmic-dot"></div>
+        <div class="cosmic-dot"></div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="actions">
+      <a href="https://github.com/bhuvanesh-m-dev/cosmotalker" class="cosmic-btn btn-secondary" target="_blank">
+        <i class="fab fa-github"></i>
+        View on GitHub
+      </a>
+      <a href="https://pypi.org/project/cosmotalker/" class="cosmic-btn btn-primary" target="_blank">
+        <i class="fab fa-python"></i>
+        PyPI Package
+      </a>
     </div>
   </div>
 
+  <!-- Footer -->
   <div class="cosmic-footer">
-    <i class="fas fa-chart-network"></i> Data via pypistats.org · Mirror stats calculated from total - direct<br>
-    <span id="lastSyncMsg">✨ awaiting telemetry...</span>
-    <button class="refresh-btn" id="refreshButton" style="margin-left: 1rem;"><i class="fas fa-sync-alt"></i> sync data</button>
+    <p>Made with <i class="fas fa-heart"></i> for the CosmoTalker Community</p>
   </div>
-</div>
 
-<script>
-  let comparisonChart = null;
-  let currentRange = 'lifetime';
-  let cachedData = null;
+  <script>
+    // Remove warp overlay after load
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        document.getElementById('warpOverlay').classList.add('hidden');
+      }, 1500);
+    });
 
-  function formatNum(n) { return n?.toLocaleString() ?? '—'; }
+    // Generate Random Stars
+    function createStars() {
+      const container = document.getElementById('starsContainer');
+      const starCount = 200;
 
-  // Generate realistic time-range data based on API patterns
-  async function fetchAllStats() {
-    const statusSpan = document.getElementById("lastSyncMsg");
-    statusSpan.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> fetching galactic data...';
-    
-    try {
-      // Fetch overall totals with and without mirrors
-      const [totalRes, directRes] = await Promise.allSettled([
-        fetch("https://pypistats.org/api/packages/cosmotalker/overall?mirrors=true"),
-        fetch("https://pypistats.org/api/packages/cosmotalker/overall?mirrors=false")
-      ]);
-      
-      let totalLifetime = 0;
-      let directLifetime = 0;
-      
-      if (totalRes.status === 'fulfilled' && totalRes.value.ok) {
-        const json = await totalRes.value.json();
-        if (json?.data) totalLifetime = json.data.reduce((s, d) => s + (d.downloads || 0), 0);
-      }
-      if (directRes.status === 'fulfilled' && directRes.value.ok) {
-        const json = await directRes.value.json();
-        if (json?.data) directLifetime = json.data.reduce((s, d) => s + (d.downloads || 0), 0);
-      }
-      
-      // If API returns less than 75K, ensure minimum display
-      if (totalLifetime < 75000) totalLifetime = 75000;
-      if (directLifetime < 35000) directLifetime = 35000;
-      
-      const mirrorLifetime = Math.max(0, totalLifetime - directLifetime);
-      
-      // Generate time-range data (simulate realistic distribution)
-      // For 3 months, 6 months, 1 year based on proportions
-      const timeRanges = {
-        '3months': { total: Math.floor(totalLifetime * 0.18), direct: Math.floor(directLifetime * 0.18) },
-        '6months': { total: Math.floor(totalLifetime * 0.35), direct: Math.floor(directLifetime * 0.35) },
-        '1year': { total: Math.floor(totalLifetime * 0.65), direct: Math.floor(directLifetime * 0.65) },
-        'lifetime': { total: totalLifetime, direct: directLifetime }
-      };
-      
-      // Also fetch recent daily data for charts
-      const recentRes = await fetch("https://pypistats.org/api/packages/cosmotalker/recent?mirrors=true&period=month");
-      let dailyData = [];
-      if (recentRes.ok) {
-        const recentJson = await recentRes.json();
-        if (recentJson?.data) dailyData = recentJson.data;
-      }
-      
-      // Generate historical data for different ranges (with/without mirrors)
-      // Create datasets for with-mirrors and without-mirrors over time
-      const historicalWithMirrors = generateHistoricalData(totalLifetime, dailyData);
-      const historicalWithoutMirrors = generateHistoricalData(directLifetime, dailyData);
-      
-      cachedData = {
-        totalLifetime,
-        directLifetime,
-        mirrorLifetime,
-        timeRanges,
-        historicalWithMirrors,
-        historicalWithoutMirrors
-      };
-      
-      updateUI(cachedData);
-      
-    } catch (err) {
-      console.error("Fetch error:", err);
-      // Fallback data
-      cachedData = getFallbackData();
-      updateUI(cachedData);
-      statusSpan.innerHTML = '<i class="fas fa-exclamation-triangle"></i> using cached estimates';
-    }
-  }
-  
-  function generateHistoricalData(baseTotal, dailyData) {
-    // Generate array of monthly aggregated data points for last 2 years
-    const months = [];
-    const now = new Date();
-    for (let i = 23; i >= 0; i--) {
-      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const monthLabel = date.toLocaleString('default', { month: 'short', year: '2-digit' });
-      // Distribute downloads across months with some variation
-      let value = Math.floor(baseTotal / 24) + Math.floor(Math.random() * (baseTotal / 48));
-      months.push({ label: monthLabel, value: Math.max(50, value) });
-    }
-    return months;
-  }
-  
-  function getFallbackData() {
-    const total = 75234;
-    const direct = 38456;
-    return {
-      totalLifetime: total,
-      directLifetime: direct,
-      mirrorLifetime: total - direct,
-      timeRanges: {
-        '3months': { total: 14200, direct: 7200 },
-        '6months': { total: 26800, direct: 13600 },
-        '1year': { total: 48900, direct: 24900 },
-        'lifetime': { total: total, direct: direct }
-      },
-      historicalWithMirrors: generateHistoricalData(total, []),
-      historicalWithoutMirrors: generateHistoricalData(direct, [])
-    };
-  }
-  
-  function updateUI(data) {
-    // Update hero number
-    document.getElementById("totalDownloadsHero").innerHTML = formatNum(data.totalLifetime) + '+';
-    
-    // Build time stats grid
-    const grid = document.getElementById("timeStatsGrid");
-    const ranges = [
-      { key: '3months', name: 'Last 3 Months', icon: 'fa-calendar-alt' },
-      { key: '6months', name: 'Last 6 Months', icon: 'fa-calendar-check' },
-      { key: '1year', name: 'Last 1 Year', icon: 'fa-calendar' },
-      { key: 'lifetime', name: 'Lifetime', icon: 'fa-infinity' }
-    ];
-    
-    grid.innerHTML = ranges.map(r => {
-      const rangeData = data.timeRanges[r.key];
-      const mirrorVal = rangeData.total - rangeData.direct;
-      return `
-        <div class="time-card">
-          <div class="time-title"><i class="fas ${r.icon}"></i> ${r.name}</div>
-          <div class="dual-stats">
-            <div class="stat-box direct">
-              <div class="label"><i class="fas fa-terminal"></i> Direct (pip)</div>
-              <div class="value">${formatNum(rangeData.direct)}</div>
-            </div>
-            <div class="stat-box mirror">
-              <div class="label"><i class="fas fa-cloud-upload-alt"></i> Mirror/CDN</div>
-              <div class="value">${formatNum(mirrorVal)}</div>
-            </div>
-          </div>
-          <div style="text-align:center; margin-top:8px; font-size:0.7rem; opacity:0.6;">
-            <i class="fas fa-chart-simple"></i> Total: ${formatNum(rangeData.total)}
-          </div>
-        </div>
-      `;
-    }).join('');
-    
-    document.getElementById("lastSyncMsg").innerHTML = `<i class="fas fa-check-circle" style="color:#2ecc71"></i> synced · ${new Date().toLocaleTimeString()}`;
-    
-    // Update chart with current range
-    updateChart(data, currentRange);
-  }
-  
-  function updateChart(data, range) {
-    if (!data) return;
-    
-    let labels = [];
-    let withMirrorsData = [];
-    let withoutMirrorsData = [];
-    
-    if (range === 'lifetime') {
-      // Show monthly breakdown for last 2 years
-      labels = data.historicalWithMirrors.map(m => m.label);
-      withMirrorsData = data.historicalWithMirrors.map(m => m.value);
-      withoutMirrorsData = data.historicalWithoutMirrors.map(m => m.value);
-    } else {
-      // For specific day ranges, generate daily data
-      const days = parseInt(range);
-      const now = new Date();
-      labels = [];
-      withMirrorsData = [];
-      withoutMirrorsData = [];
-      
-      const baseDailyWith = Math.floor(data.totalLifetime / 365);
-      const baseDailyWithout = Math.floor(data.directLifetime / 365);
-      
-      for (let i = days - 1; i >= 0; i--) {
-        const date = new Date(now);
-        date.setDate(date.getDate() - i);
-        labels.push(date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }));
-        // Add some realistic variation
-        const variation = 0.5 + Math.random() * 1;
-        withMirrorsData.push(Math.floor(baseDailyWith * variation) + 10);
-        withoutMirrorsData.push(Math.floor(baseDailyWithout * variation) + 5);
+      for (let i = 0; i < starCount; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        
+        const size = Math.random() * 3 + 1;
+        const x = Math.random() * 100;
+        const y = Math.random() * 100;
+        const duration = Math.random() * 3 + 2;
+        const opacity = Math.random() * 0.7 + 0.3;
+        const delay = Math.random() * 5;
+
+        star.style.cssText = `
+          width: ${size}px;
+          height: ${size}px;
+          left: ${x}%;
+          top: ${y}%;
+          --duration: ${duration}s;
+          --opacity: ${opacity};
+          animation-delay: ${delay}s;
+        `;
+
+        container.appendChild(star);
       }
     }
-    
-    if (comparisonChart) comparisonChart.destroy();
-    const ctx = document.getElementById('comparisonChart').getContext('2d');
-    comparisonChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: labels,
-        datasets: [
-          {
-            label: '📊 With Mirrors (Total)',
-            data: withMirrorsData,
-            borderColor: '#60a5fa',
-            backgroundColor: 'rgba(96, 165, 250, 0.05)',
-            borderWidth: 3,
-            pointRadius: 2,
-            pointBackgroundColor: '#60a5fa',
-            tension: 0.3,
-            fill: true
-          },
-          {
-            label: '⚡ Without Mirrors (Direct)',
-            data: withoutMirrorsData,
-            borderColor: '#c084fc',
-            backgroundColor: 'rgba(192, 132, 252, 0.05)',
-            borderWidth: 3,
-            pointRadius: 2,
-            pointBackgroundColor: '#c084fc',
-            tension: 0.3,
-            fill: true
+
+    // Create Shooting Stars
+    function createShootingStar() {
+      const container = document.getElementById('starsContainer');
+      const shootingStar = document.createElement('div');
+      shootingStar.className = 'shooting-star';
+      
+      const startY = Math.random() * 50;
+      shootingStar.style.top = `${startY}%`;
+      shootingStar.style.left = '0';
+      
+      container.appendChild(shootingStar);
+      
+      setTimeout(() => {
+        shootingStar.remove();
+      }, 3000);
+    }
+
+    // Create Constellation Lines
+    function createConstellation() {
+      const svg = document.getElementById('constellation');
+      const points = [];
+      const numPoints = 8;
+      
+      // Generate random points
+      for (let i = 0; i < numPoints; i++) {
+        points.push({
+          x: Math.random() * window.innerWidth,
+          y: Math.random() * window.innerHeight
+        });
+      }
+      
+      // Draw lines between nearby points
+      for (let i = 0; i < points.length; i++) {
+        for (let j = i + 1; j < points.length; j++) {
+          const distance = Math.hypot(points[i].x - points[j].x, points[i].y - points[j].y);
+          
+          if (distance < 300) {
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', points[i].x);
+            line.setAttribute('y1', points[i].y);
+            line.setAttribute('x2', points[j].x);
+            line.setAttribute('y2', points[j].y);
+            line.setAttribute('class', 'constellation-line');
+            svg.appendChild(line);
           }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: {
-          legend: { labels: { color: '#b9c7db' } },
-          tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.raw.toLocaleString()} downloads` } }
-        },
-        scales: {
-          y: { grid: { color: '#2a3344' }, ticks: { color: '#a0b3d9' } },
-          x: { ticks: { color: '#a0b3d9', maxRotation: 45, autoSkip: true } }
         }
       }
-    });
-  }
-  
-  // Starfield
-  function createStars() {
-    const starfield = document.getElementById('starfield');
-    for (let i = 0; i < 300; i++) {
-      const star = document.createElement('div');
-      star.classList.add('star');
-      const size = Math.random() * 3 + 1;
-      star.style.width = `${size}px`;
-      star.style.height = `${size}px`;
-      star.style.left = `${Math.random() * 100}%`;
-      star.style.top = `${Math.random() * 100}%`;
-      star.style.animationDelay = `${Math.random() * 5}s`;
-      star.style.animationDuration = `${Math.random() * 3 + 1.5}s`;
-      star.style.opacity = Math.random() * 0.7 + 0.2;
-      starfield.appendChild(star);
     }
-  }
-  
-  // Chart range selector
-  document.getElementById('chartRangeSelector')?.addEventListener('click', (e) => {
-    const btn = e.target.closest('.range-btn');
-    if (!btn) return;
-    document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentRange = btn.dataset.range;
-    if (cachedData) updateChart(cachedData, currentRange);
-  });
-  
-  document.getElementById('refreshButton')?.addEventListener('click', () => {
-    fetchAllStats();
-  });
-  
-  createStars();
-  fetchAllStats();
-  setInterval(fetchAllStats, 120000);
-  
-  // Nebula animation
-  const nebulas = document.querySelectorAll('.nebula');
-  anime({ targets: nebulas, translateX: ['0%', '2%'], translateY: ['0%', '1.5%'], duration: 20000, direction: 'alternate', loop: true, easing: 'easeInOutSine' });
-</script>
+
+    // Initialize
+    createStars();
+    createConstellation();
+    
+    // Random shooting stars
+    setInterval(createShootingStar, 4000);
+
+    // Animate elements with Anime.js
+    anime({
+      targets: '.title',
+      opacity: [0, 1],
+      translateY: [30, 0],
+      duration: 1000,
+      easing: 'easeOutExpo',
+      delay: 500
+    });
+
+    anime({
+      targets: '.subtitle',
+      opacity: [0, 1],
+      translateY: [20, 0],
+      duration: 1000,
+      easing: 'easeOutExpo',
+      delay: 700
+    });
+
+    anime({
+      targets: '.testing-badge',
+      opacity: [0, 1],
+      scale: [0.8, 1],
+      duration: 800,
+      easing: 'easeOutBack',
+      delay: 900
+    });
+
+    anime({
+      targets: '.message-card',
+      opacity: [0, 1],
+      translateY: [40, 0],
+      duration: 1000,
+      easing: 'easeOutExpo',
+      delay: 1100
+    });
+
+    anime({
+      targets: '.cosmic-btn',
+      opacity: [0, 1],
+      translateY: [20, 0],
+      duration: 800,
+      easing: 'easeOutExpo',
+      delay: anime.stagger(100, {start: 1300})
+    });
+
+    // Parallax effect on mouse move
+    document.addEventListener('mousemove', (e) => {
+      const mouseX = e.clientX / window.innerWidth - 0.5;
+      const mouseY = e.clientY / window.innerHeight - 0.5;
+
+      anime({
+        targets: '.nebula',
+        translateX: mouseX * 30,
+        translateY: mouseY * 30,
+        duration: 1000,
+        easing: 'easeOutQuad'
+      });
+
+      anime({
+        targets: '.planet',
+        translateX: mouseX * 50,
+        translateY: mouseY * 50,
+        duration: 1000,
+        easing: 'easeOutQuad'
+      });
+    });
+
+    // Resize handler for constellation
+    window.addEventListener('resize', () => {
+      document.getElementById('constellation').innerHTML = '';
+      createConstellation();
+    });
+  </script>
 </body>
 </html>
