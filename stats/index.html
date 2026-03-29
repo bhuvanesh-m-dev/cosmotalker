@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CosmoTalker Stats</title>
+  <style>
+    body { font-family: Arial; text-align: center; background: #0d1117; color: white; }
+    .card { margin: 20px auto; padding: 20px; width: 300px; border-radius: 10px; background: #161b22; }
+    h1 { color: #58a6ff; }
+  </style>
+</head>
+<body>
+
+<h1>🚀 CosmoTalker Analytics</h1>
+
+<div class="card">
+  <h2>Total Downloads</h2>
+  <p id="total">Loading...</p>
+</div>
+
+<div class="card">
+  <h2>Direct (pip) Downloads</h2>
+  <p id="direct">Loading...</p>
+</div>
+
+<div class="card">
+  <h2>Mirror Downloads 🌍</h2>
+  <p id="mirror">Loading...</p>
+</div>
+
+<script>
+async function fetchStats() {
+  const withMirrors = await fetch("https://pypistats.org/api/packages/cosmotalker/overall?mirrors=true").then(res => res.json());
+  const withoutMirrors = await fetch("https://pypistats.org/api/packages/cosmotalker/overall?mirrors=false").then(res => res.json());
+
+  const total = withMirrors.data.reduce((sum, d) => sum + d.downloads, 0);
+  const direct = withoutMirrors.data.reduce((sum, d) => sum + d.downloads, 0);
+  const mirror = total - direct;
+
+  document.getElementById("total").innerText = total.toLocaleString();
+  document.getElementById("direct").innerText = direct.toLocaleString();
+  document.getElementById("mirror").innerText = mirror.toLocaleString();
+}
+
+fetchStats();
+</script>
+
+</body>
+</html>
