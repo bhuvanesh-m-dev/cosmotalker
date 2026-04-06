@@ -12,20 +12,11 @@ Unlike standard AI interactions, CosmoTalker delivers accurate, up-to-date, and 
 
 Here is a side-by-side look at how CosmoTalker transforms a standard text response into a highly structured, visually rich educational experience.
 
-### Example 1
 | Normal ChatGPT | CosmoTalker GPT |
 | :---: | :---: |
-| ![Normal ChatGPT 1](img/ChatGPT%201.png) | ![CosmoTalker 1](img/CosmoTalker%201.png) |
-
-### Example 2
-| Normal ChatGPT | CosmoTalker GPT |
-| :---: | :---: |
-| ![Normal ChatGPT 2](img/ChatGPT%202.png) | ![CosmoTalker 2](img/CosmoTalker%202.png) |
-
-### Example 3
-| Normal ChatGPT | CosmoTalker GPT |
-| :---: | :---: |
-| ![Normal ChatGPT 3](img/ChatGPT%203.png) | ![CosmoTalker 3](img/CosmoTalker%203.png) |
+| ![Normal ChatGPT 1](https://raw.githubusercontent.com/bhuvanesh-m-dev/cosmotalker/refs/heads/main/gpt/img/ChatGPT/1.png) | ![CosmoTalker 1](https://raw.githubusercontent.com/bhuvanesh-m-dev/cosmotalker/refs/heads/main/gpt/img/CosmoTalker/1.png) |
+| ![Normal ChatGPT 2](https://raw.githubusercontent.com/bhuvanesh-m-dev/cosmotalker/refs/heads/main/gpt/img/ChatGPT/2.png) | ![CosmoTalker 2](https://raw.githubusercontent.com/bhuvanesh-m-dev/cosmotalker/refs/heads/main/gpt/img/CosmoTalker/2.png) |
+| ![Normal ChatGPT 3](https://raw.githubusercontent.com/bhuvanesh-m-dev/cosmotalker/refs/heads/main/gpt/img/ChatGPT/3.png) | ![CosmoTalker 3](https://raw.githubusercontent.com/bhuvanesh-m-dev/cosmotalker/refs/heads/main/gpt/img/CosmoTalker/3.png) |
 
 *(Note: Ensure your image files match the `.png` extension or update the markdown paths accordingly).*
 
