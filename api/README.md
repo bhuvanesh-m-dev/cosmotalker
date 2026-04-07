@@ -28,6 +28,7 @@ async function getSpaceData() {
 ## 📚 Available Methods
 - `CosmoAPI.search(query)`
 - `CosmoAPI.planetInfo(planetName)`
+- `CosmoAPI.get(topic)`
 - `CosmoAPI.getFunFact()`
 - `CosmoAPI.spacex()`
 - `CosmoAPI.celestrak()`
@@ -38,3 +39,4 @@ async function getSpaceData() {
 
 - **Documentation**: Open `how-to-use-the-CosmoTalker-api.html` in your browser for a full integration guide.
 - **Interactive Demo**: Open `index.html` to test the API directly from a graphical interface.
+- **Chatbot Demo**: Open `space-chat.html` to see a space-themed chatbot powered by CosmoTalker!
