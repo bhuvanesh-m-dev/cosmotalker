@@ -74,6 +74,7 @@ def exec_api(code_str):
     return {
         search: (query) => runCommand(`ct.search('${query}')`),
         planetInfo: (planet) => runCommand(`ct.planet_info('${planet}')`),
+        get: (topic) => runCommand(`ct.get('${topic}')`),
         getFunFact: () => runCommand(`ct.get_fun_fact()`),
         spacex: () => runCommand(`ct.spacex()`),
         celestrak: () => runCommand(`ct.celestrak()`),
