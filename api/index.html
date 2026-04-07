@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CosmoTalker Browser API Test</title>
+    <style>
+        body { font-family: monospace; background: #0b0c11; color: #d4e0f0; padding: 20px; }
+        button { background: #38bdf8; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; color: #000; font-weight: bold; margin-bottom: 20px;}
+        button:disabled { background: #555; cursor: not-allowed; }
+        pre { background: #11182e; padding: 15px; border-radius: 5px; min-height: 100px; white-space: pre-wrap; }
+        .loader { color: #a855f7; display: none; margin-left: 10px; }
+    </style>
+
+    <!-- 1. Include the CosmoTalker JS API -->
+    <script src="cosmo-api.js"></script>
+</head>
+<body>
+
+    <h2>🌌 CosmoTalker Client-Side API Demo</h2>
+    <p>This page demonstrates how frontend developers can call CosmoTalker directly using JavaScript!</p>
+
+    <!-- Action Buttons -->
+    <button id="btn-fact" onclick="fetchFunFact()">Get Fun Fact</button>
+    <button id="btn-planet" onclick="fetchPlanet()">Planet Info (Mars)</button>
+    <button id="btn-search" onclick="searchCosmos()">Search (Black Hole)</button>
+    <span id="loading" class="loader">Loading Pyodide & CosmoTalker (~5s first load)...</span>
+
+    <!-- Output Console -->
+    <h3>API Output:</h3>
+    <pre id="output">Waiting for command...</pre>
+
+    <script>
+        const outputBox = document.getElementById("output");
+        const loadingIndicator = document.getElementById("loading");
+
+        // Wrapper to handle the UI loading states automatically
+        async function callCosmoAPI(apiCall) {
+            loadingIndicator.style.display = "inline";
+            outputBox.textContent = "Processing... (This runs CosmoTalker natively in the browser)";
+            
+            const response = await apiCall();
+            
+            if (response.status === "success") {
+                outputBox.textContent = response.data;
+            } else {
+                outputBox.textContent = "Error: " + response.message;
+            }
+            loadingIndicator.style.display = "none";
+        }
+
+        // Example API Implementations
+        function fetchFunFact() {
+            callCosmoAPI(() => CosmoAPI.getFunFact());
+        }
+        function fetchPlanet() {
+            callCosmoAPI(() => CosmoAPI.planetInfo("Mars"));
+        }
+        function searchCosmos() {
+            callCosmoAPI(() => CosmoAPI.search("black hole"));
+        }
+    </script>
+</body>
+</html>
