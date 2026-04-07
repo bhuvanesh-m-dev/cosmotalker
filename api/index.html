@@ -59,6 +59,27 @@
         function searchCosmos() {
             callCosmoAPI(() => CosmoAPI.search("black hole"));
         }
+
+        // Automatically execute API commands based on URL parameters on load
+        window.onload = () => {
+            const params = new URLSearchParams(window.location.search);
+            
+            if (params.has('get')) {
+                callCosmoAPI(() => CosmoAPI.get(params.get('get')));
+            } else if (params.has('search')) {
+                callCosmoAPI(() => CosmoAPI.search(params.get('search')));
+            } else if (params.has('planet')) {
+                callCosmoAPI(() => CosmoAPI.planetInfo(params.get('planet')));
+            } else if (params.has('wiki')) {
+                callCosmoAPI(() => CosmoAPI.wiki(params.get('wiki')));
+            } else if (params.has('fact')) {
+                callCosmoAPI(() => CosmoAPI.getFunFact());
+            } else if (params.has('spacex')) {
+                callCosmoAPI(() => CosmoAPI.spacex());
+            } else if (params.has('celestrak')) {
+                callCosmoAPI(() => CosmoAPI.celestrak());
+            }
+        };
     </script>
 </body>
 </html>
