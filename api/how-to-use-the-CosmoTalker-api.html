@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Use CosmoTalker API</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0b0c11;
+            color: #d4e0f0;
+            line-height: 1.6;
+            padding: 40px;
+            max-width: 800px;
+            margin: auto;
+        }
+        h1, h2, h3 { color: #a855f7; }
+        h1 { border-bottom: 2px solid #1d2a4d; padding-bottom: 10px; margin-bottom: 30px;}
+        code { 
+            background: #11182e; 
+            padding: 3px 6px; 
+            border-radius: 4px; 
+            color: #38bdf8; 
+            font-family: 'Courier New', Courier, monospace; 
+        }
+        pre { 
+            background: #11182e; 
+            padding: 15px; 
+            border-radius: 8px; 
+            overflow-x: auto; 
+            border: 1px solid #1d2a4d; 
+        }
+        pre code { 
+            background: none; 
+            padding: 0; 
+            color: #e2f0e8; 
+        }
+        .step { 
+            background: #121927; 
+            border-left: 4px solid #38bdf8; 
+            padding: 15px 25px; 
+            margin: 25px 0; 
+            border-radius: 0 8px 8px 0; 
+        }
+        ul { background: #121927; padding: 20px 40px; border-radius: 8px; border: 1px solid #1d2a4d; }
+        li { margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <h1>🌌 How to Use the CosmoTalker Browser API</h1>
+    <p>The CosmoTalker Browser API allows frontend developers to execute CosmoTalker Python commands directly in the browser via JavaScript, returning clean JSON responses. <b>No backend server is required!</b></p>
+    
+    <div class="step">
+        <h2>Step 1: Import the SDK</h2>
+        <p>Include the <code>cosmo-api.js</code> file in the <code>&lt;head&gt;</code> of your HTML document.</p>
+        <pre><code>&lt;script src="https://bhuvanesh-m-dev.github.io/cosmotalker/api/cosmo-api.js"&gt;&lt;/script&gt;</code></pre>
+        <p><i>Note: This exposes a global JavaScript object named <code>CosmoAPI</code>.</i></p>
+    </div>
+
+    <div class="step">
+        <h2>Step 2: Write an Async Function</h2>
+        <p>Because Pyodide (the Python WASM engine) takes a few seconds to load the first time it is called, all API methods are asynchronous. You must use <code>async/await</code> or <code>.then()</code> chains.</p>
+        <pre><code>async function mySpaceApp() {
+    console.log("Contacting Cosmos...");
+    
+    // Call the planet info API
+    const result = await CosmoAPI.planetInfo("Mars");
+    
+    if (result.status === "success") {
+        console.log("Data received:\n", result.data);
+    } else {
+        console.error("Error:", result.message);
+    }
+}</code></pre>
+    </div>
+
+    <div class="step">
+        <h2>Step 3: Trigger the Code</h2>
+        <p>You can bind this function to a button click, a form submission, or call it as soon as the webpage loads.</p>
+        <pre><code>&lt;button onclick="mySpaceApp()"&gt;Explore Mars&lt;/button&gt;</code></pre>
+    </div>
+
+    <h2>📚 Available API Methods</h2>
+    <ul>
+        <li><code>CosmoAPI.getFunFact()</code> - Returns a random space fun fact.</li>
+        <li><code>CosmoAPI.planetInfo("Jupiter")</code> - Fetches statistics for a specific planet.</li>
+        <li><code>CosmoAPI.search("black hole")</code> - Searches the CosmoTalker DB for an astronomical topic.</li>
+        <li><code>CosmoAPI.spacex()</code> - Gets the latest SpaceX launch information.</li>
+        <li><code>CosmoAPI.celestrak()</code> - Retrieves Celestrak data.</li>
+        <li><code>CosmoAPI.wiki("Apollo 11")</code> - Fetches Wikipedia summaries for space topics.</li>
+        <li><code>CosmoAPI.execute("print('Hello Space')")</code> - Advanced: Runs custom Python/CosmoTalker code.</li>
+    </ul>
+
+    <p style="margin-top: 40px; text-align: center; color: #94a3b8;">
+        Ready to test it? Check out the <a href="index.html" style="color: #a855f7; font-weight: bold; text-decoration: none;">Live API Demo Page</a>.
+    </p>
+</body>
+</html>
