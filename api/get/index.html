@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>CosmoTalker API - Text Output</title>
+    <title>CosmoTalker API - Unified .get() Endpoint</title>
     <script src="https://cdn.jsdelivr.net/pyodide/v0.29.3/full/pyodide.js"></script>
     <style>
         body {
@@ -36,6 +36,7 @@
         .loading-line.warning { color: #f59e0b; }
         .loading-line.error { color: #ef4444; }
         .loading-line.system { color: #a78bfa; }
+        .loading-line.stdout { color: #e2e8f0; }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateX(-10px); }
             to { opacity: 1; transform: translateX(0); }
@@ -56,36 +57,36 @@
         .result-box {
             background: #0f172a;
             border-radius: 12px;
-            padding: 24px;
+            padding: 20px;
             border-left: 4px solid #10b981;
             max-width: 800px;
             margin: 20px auto 0;
         }
         .result-header {
             font-weight: bold;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             padding-bottom: 8px;
             border-bottom: 1px solid #334155;
             color: #10b981;
-            font-size: 14px;
         }
-        .answer-text {
-            line-height: 1.8;
-            font-size: 14px;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-        }
-        .answer-text p {
-            margin: 12px 0;
-        }
-        .error-box {
+        .error-header {
             border-left-color: #ef4444;
+        }
+        .error-header .result-header {
+            color: #ef4444;
+        }
+        .json-response {
+            background: #1e293b;
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
         }
         pre {
             white-space: pre-wrap;
             word-wrap: break-word;
+            margin: 0;
             font-family: inherit;
-            line-height: 1.6;
+            font-size: 12px;
         }
     </style>
 </head>
@@ -93,6 +94,9 @@
     <div id="output"></div>
     
     <script>
+        // CosmoTalker API v2.62 - Uses ONLY .get() function
+        // No version attribute check - just works
+        
         let pyodide = null;
         let isReady = false;
         let outputDiv = null;
@@ -128,20 +132,29 @@
             log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'system');
             
             try {
-                log('📦 Loading Pyodide...', 'info');
+                // Step 1: Load Pyodide
+                log('📦 Loading Pyodide (Python WebAssembly)...', 'info');
                 const loadStart = performance.now();
                 
                 pyodide = await loadPyodide({
                     indexURL: "https://cdn.jsdelivr.net/pyodide/v0.29.3/full/",
-                    stdout: () => {},
-                    stderr: () => {}
+                    stdout: (text) => {
+                        if (text && !text.includes('Loading ') && !text.includes('Loaded ')) {
+                            log(`[CosmoTalker] ${text}`, 'stdout');
+                        }
+                    },
+                    stderr: (text) => {
+                        if (text && !text.includes('Loading ')) {
+                            log(`[Error] ${text}`, 'error');
+                        }
+                    }
                 });
                 
                 const loadTime = ((performance.now() - loadStart) / 1000).toFixed(2);
                 log(`✅ Pyodide loaded in ${loadTime}s`, 'success');
                 
+                // Step 2: Setup Python output capture
                 log('🔧 Setting up Python environment...', 'info');
-                
                 pyodide.runPython(`
 import sys
 import io
@@ -151,7 +164,7 @@ class OutputCapture:
         self.buffer = io.StringIO()
     
     def write(self, text):
-        if text:
+        if text and text.strip():
             self.buffer.write(text)
     
     def get_output(self):
@@ -171,51 +184,63 @@ def clear_capture():
     _capture.clear()
                 `);
                 
-                log('📦 Loading micropip...', 'info');
+                // Step 3: Install micropip
+                log('📦 Loading micropip package manager...', 'info');
                 await pyodide.loadPackage("micropip");
                 log('✅ micropip ready', 'success');
                 
                 const micropip = pyodide.pyimport("micropip");
                 
+                // Step 4: Install CosmoTalker v2.62 only
                 log('🚀 Installing CosmoTalker v2.62...', 'info');
+                log('   📦 cosmotalker==2.62', 'info');
+                log('   📦 cosmodb (dependency)', 'info');
+                log('   📦 requests (dependency)', 'info');
+                log('   📦 pytz (dependency)', 'info');
+                
                 const installStart = performance.now();
                 
+                // Install exact version 2.62
                 await micropip.install("cosmotalker==2.62");
                 await micropip.install(["cosmodb", "requests", "pytz"]);
                 
                 const installTime = ((performance.now() - installStart) / 1000).toFixed(2);
                 log(`✅ CosmoTalker v2.62 installed in ${installTime}s`, 'success');
                 
-                log('🔧 Configuring CosmoTalker...', 'info');
+                // Step 5: Configure CosmoTalker (no version check)
+                log('🔧 Configuring CosmoTalker for browser...', 'info');
                 pyodide.runPython(`
 import sys
 import types
 
-# Mock tkinter
+# Mock tkinter modules (not available in browser)
 for mod in ['tkinter', 'tkinter.messagebox', 'tkinter.ttk', 'customtkinter']:
     sys.modules[mod] = types.ModuleType(mod)
 
+# Import CosmoTalker
 import cosmotalker as ct
 
-# Disable image preview
+# Disable image preview (not supported in browser)
 class DummyImg:
     def __call__(self, *args, **kwargs):
-        return None
+        return "⚠️ Image preview not available in web version"
 
 ct.img = DummyImg()
 
-print("✨ CosmoTalker v2.62 ready!")
+print("✨ CosmoTalker v2.62 is ready!")
+print("🌌 Unified .get() function loaded")
 print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
                 `);
                 
-                log('🎉 Ready!', 'success');
+                log('🎉 CosmoTalker initialization complete!', 'success');
+                log('✨ Ready to answer space questions using .get()', 'success');
                 log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'system');
                 
                 isReady = true;
                 return pyodide;
                 
             } catch (error) {
-                log(`❌ Failed: ${error.message}`, 'error');
+                log(`❌ Initialization failed: ${error.message}`, 'error');
                 throw error;
             }
         }
@@ -225,98 +250,99 @@ print("━━━━━━━━━━━━━━━━━━━━━━━━�
             
             try {
                 await initCosmoTalker();
+                
+                // Clear previous output
                 pyodide.runPython(`clear_capture()`);
                 
-                log(`🔭 Query: "${question}"`, 'system');
+                log(`🔭 Processing: "${question}"`, 'system');
                 
-                // Execute cosmotalker.get() and format output nicely
+                // Use ONLY cosmotalker.get() - no version check
                 const pythonCode = `
 import cosmotalker as ct
 
-print()
-print("=" * 50)
-print(f"📡 COSMOTALKER RESPONSE")
-print("=" * 50)
-print()
+print("🔍 Querying CosmoTalker database...")
+print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 
 try:
+    # Use the unified get() function
     result = ct.get(${JSON.stringify(question)})
     
-    if result:
-        # If result is a string, print it directly
-        if isinstance(result, str):
-            print(result)
-        # If result is a dictionary, format it nicely
-        elif isinstance(result, dict):
-            # Remove duplicate keys and format
-            seen = set()
-            for key, value in result.items():
-                if key not in seen and value and str(value).strip():
-                    seen.add(key)
-                    # Format the key nicely
-                    key_display = key.replace('_', ' ').title()
-                    print(f"• {key_display}: {value}")
-        # If result has __dict__ attribute
-        elif hasattr(result, '__dict__'):
-            for key, value in result.__dict__.items():
-                if value and str(value).strip() and not key.startswith('_'):
-                    key_display = key.replace('_', ' ').title()
-                    print(f"• {key_display}: {value}")
-        else:
-            print(str(result))
+    if result and str(result).strip():
+        print("✅ Answer from CosmoTalker:")
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        print(result)
     else:
-        print(f"No information found for: ${JSON.stringify(question)}")
-        print()
-        print("💡 Try asking about:")
-        print("   • Planets (earth, mars, jupiter)")
-        print("   • ISS location")
-        print("   • SpaceX missions")
-        print("   • Fun facts")
+        print("⚠️ No information found for:", ${JSON.stringify(question)})
+        print("💡 Try these examples:")
+        print("   • earth")
+        print("   • mars")
+        print("   • iss location")
+        print("   • spacex")
+        print("   • black hole")
         
 except Exception as e:
-    print(f"Error: {str(e)}")
-    print()
-    print("💡 Try these queries:")
-    print("   • earth")
-    print("   • mars")
-    print("   • jupiter")
-    print("   • iss location")
-    print("   • spacex")
-
-print()
-print("=" * 50)
-print(f"✨ Query completed")
-print("=" * 50)
+    print(f"❌ Error: {str(e)}")
+    print("💡 CosmoTalker .get() works with queries like:")
+    print("   • planet names (earth, mars, jupiter)")
+    print("   • 'iss location'")
+    print("   • 'spacex'")
+    print("   • 'fun fact'")
                 `;
                 
                 log('🚀 Calling cosmotalker.get()...', 'info');
                 
-                await pyodide.runPythonAsync(pythonCode);
+                // Execute with timeout
+                const executionPromise = pyodide.runPythonAsync(pythonCode);
+                const timeoutPromise = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error("Timeout (30s)")), 30000);
+                });
                 
-                const output = pyodide.runPython(`get_captured()`);
+                await Promise.race([executionPromise, timeoutPromise]);
+                
+                // Get captured output
+                let output = pyodide.runPython(`get_captured()`);
+                output = output.trim();
+                
                 const executionTime = ((performance.now() - startTime) / 1000).toFixed(3);
                 
-                log(`✅ Query completed in ${executionTime}s`, 'success');
-                log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'system');
-                
-                return {
-                    success: true,
-                    query: question,
-                    answer: output,
-                    execution_time: parseFloat(executionTime),
-                    timestamp: new Date().toISOString(),
-                    method: "cosmotalker.get()",
-                    version: "2.62"
-                };
+                if (output && output.length > 0 && !output.includes('No information found')) {
+                    log(`✅ Query completed in ${executionTime}s`, 'success');
+                    log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'system');
+                    
+                    return {
+                        success: true,
+                        query: question,
+                        result: output,
+                        execution_time: parseFloat(executionTime),
+                        timestamp: new Date().toISOString(),
+                        method: "cosmotalker.get()",
+                        version: "2.62"
+                    };
+                } else {
+                    log(`⚠️ No results for "${question}"`, 'warning');
+                    
+                    return {
+                        success: false,
+                        query: question,
+                        result: null,
+                        error: "No information found. Try: earth, mars, iss location, spacex, fun fact",
+                        execution_time: parseFloat(executionTime),
+                        timestamp: new Date().toISOString(),
+                        method: "cosmotalker.get()",
+                        version: "2.62"
+                    };
+                }
                 
             } catch (error) {
                 const executionTime = ((performance.now() - startTime) / 1000).toFixed(3);
                 log(`❌ Error: ${error.message}`, 'error');
+                log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'system');
                 
                 return {
                     success: false,
                     query: question,
-                    answer: `Error: ${error.message}`,
+                    result: null,
+                    error: error.message,
                     execution_time: parseFloat(executionTime),
                     timestamp: new Date().toISOString(),
                     method: "cosmotalker.get()",
@@ -332,23 +358,24 @@ print("=" * 50)
             if (!question) {
                 await initCosmoTalker();
                 log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'system');
-                log('💡 Usage: ?q=your question', 'info');
+                log('💡 Usage: Add ?q=your question to the URL', 'info');
                 log('📝 Examples:', 'info');
                 log('   • ?q=earth', 'info');
                 log('   • ?q=mars', 'info');
-                log('   • ?q=jupiter', 'info');
                 log('   • ?q=iss location', 'info');
                 log('   • ?q=spacex', 'info');
+                log('   • ?q=fun fact', 'info');
                 log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'system');
                 
                 const errorResponse = {
                     success: false,
                     error: "Missing 'q' parameter",
-                    examples: ["?q=earth", "?q=mars", "?q=jupiter", "?q=iss location", "?q=spacex"],
+                    message: "Please provide a question using the 'q' parameter",
+                    examples: ["?q=earth", "?q=mars", "?q=iss location", "?q=spacex", "?q=fun fact"],
                     timestamp: new Date().toISOString()
                 };
                 
-                renderTextAnswer(errorResponse.error, errorResponse);
+                renderJSON(errorResponse, false);
                 return;
             }
             
@@ -357,32 +384,33 @@ print("=" * 50)
             } catch(e) {}
             
             const result = await executeQuery(question);
-            renderTextAnswer(result.answer, result);
+            renderJSON(result, result.success);
         }
         
-        function renderTextAnswer(answer, metadata) {
+        function renderJSON(data, isSuccess = true) {
+            const jsonString = JSON.stringify(data, null, 2);
+            
             const resultDiv = document.createElement('div');
-            resultDiv.className = `result-box ${!metadata.success ? 'error-box' : ''}`;
-            
-            // Convert answer to readable paragraphs
-            let formattedAnswer = answer
-                .replace(/\n/g, '<br>')
-                .replace(/•/g, '<span style="color: #a78bfa;">•</span>')
-                .replace(/=/g, '<span style="color: #334155;">─</span>');
-            
+            resultDiv.className = `result-box ${!isSuccess ? 'error-header' : ''}`;
             resultDiv.innerHTML = `
                 <div class="result-header">
-                    📡 CosmoTalker Response
-                    ${metadata.execution_time ? `<span style="float: right; font-size: 11px;">⚡ ${metadata.execution_time}s</span>` : ''}
+                    ${isSuccess ? '✅ API Response (JSON)' : '⚠️ API Response (JSON)'}
                 </div>
-                <div class="answer-text">
-                    ${formattedAnswer}
+                <div class="json-response">
+                    <pre>${escapeHtml(jsonString)}</pre>
                 </div>
             `;
             
             document.body.appendChild(resultDiv);
         }
         
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Start
         handleRequest();
     </script>
 </body>
