@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>CosmoTalker API - Structured JSON Output</title>
+    <title>CosmoTalker API - Text Output</title>
     <script src="https://cdn.jsdelivr.net/pyodide/v0.29.3/full/pyodide.js"></script>
     <style>
         body {
@@ -21,7 +21,7 @@
             font-family: monospace;
             font-size: 13px;
             line-height: 1.6;
-            max-width: 900px;
+            max-width: 800px;
             margin: 0 auto 20px;
         }
         .loading-line {
@@ -56,40 +56,36 @@
         .result-box {
             background: #0f172a;
             border-radius: 12px;
-            padding: 20px;
+            padding: 24px;
             border-left: 4px solid #10b981;
-            max-width: 900px;
+            max-width: 800px;
             margin: 20px auto 0;
         }
         .result-header {
             font-weight: bold;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
             padding-bottom: 8px;
             border-bottom: 1px solid #334155;
             color: #10b981;
+            font-size: 14px;
         }
-        .json-response {
-            background: #1e293b;
-            padding: 20px;
-            border-radius: 8px;
-            overflow-x: auto;
+        .answer-text {
+            line-height: 1.8;
+            font-size: 14px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .answer-text p {
+            margin: 12px 0;
+        }
+        .error-box {
+            border-left-color: #ef4444;
         }
         pre {
             white-space: pre-wrap;
             word-wrap: break-word;
-            margin: 0;
             font-family: inherit;
-            font-size: 13px;
-            line-height: 1.5;
-        }
-        .key {
-            color: #c084fc;
-        }
-        .string {
-            color: #10b981;
-        }
-        .number {
-            color: #f59e0b;
+            line-height: 1.6;
         }
     </style>
 </head>
@@ -146,18 +142,16 @@
                 
                 log('🔧 Setting up Python environment...', 'info');
                 
-                // Setup output capture and JSON formatter
                 pyodide.runPython(`
 import sys
 import io
-import json
 
 class OutputCapture:
     def __init__(self):
         self.buffer = io.StringIO()
     
     def write(self, text):
-        if text and text.strip():
+        if text:
             self.buffer.write(text)
     
     def get_output(self):
@@ -175,19 +169,6 @@ def get_captured():
 
 def clear_capture():
     _capture.clear()
-
-def format_result(data):
-    """Convert Python objects to clean JSON"""
-    if data is None:
-        return None
-    if isinstance(data, (str, int, float, bool)):
-        return data
-    if isinstance(data, (dict, list)):
-        return data
-    try:
-        return json.loads(json.dumps(data, default=str))
-    except:
-        return str(data)
                 `);
                 
                 log('📦 Loading micropip...', 'info');
@@ -248,106 +229,85 @@ print("━━━━━━━━━━━━━━━━━━━━━━━━�
                 
                 log(`🔭 Query: "${question}"`, 'system');
                 
-                // Execute and get structured data
+                // Execute cosmotalker.get() and format output nicely
                 const pythonCode = `
 import cosmotalker as ct
-import json
+
+print()
+print("=" * 50)
+print(f"📡 COSMOTALKER RESPONSE")
+print("=" * 50)
+print()
 
 try:
     result = ct.get(${JSON.stringify(question)})
     
-    # Format the result as clean JSON
-    if result is not None:
-        # Convert result to serializable format
-        if hasattr(result, '__dict__'):
-            output = result.__dict__
+    if result:
+        # If result is a string, print it directly
+        if isinstance(result, str):
+            print(result)
+        # If result is a dictionary, format it nicely
         elif isinstance(result, dict):
-            output = result
-        elif isinstance(result, (list, tuple)):
-            output = [str(item) for item in result]
+            # Remove duplicate keys and format
+            seen = set()
+            for key, value in result.items():
+                if key not in seen and value and str(value).strip():
+                    seen.add(key)
+                    # Format the key nicely
+                    key_display = key.replace('_', ' ').title()
+                    print(f"• {key_display}: {value}")
+        # If result has __dict__ attribute
+        elif hasattr(result, '__dict__'):
+            for key, value in result.__dict__.items():
+                if value and str(value).strip() and not key.startswith('_'):
+                    key_display = key.replace('_', ' ').title()
+                    print(f"• {key_display}: {value}")
         else:
-            output = str(result)
-        
-        # Print as JSON for parsing
-        print("__START_RESULT__")
-        print(json.dumps(output, default=str, indent=2))
-        print("__END_RESULT__")
+            print(str(result))
     else:
-        print("__START_RESULT__")
-        print(json.dumps({"error": "No information found", "query": ${JSON.stringify(question)}}, indent=2))
-        print("__END_RESULT__")
+        print(f"No information found for: ${JSON.stringify(question)}")
+        print()
+        print("💡 Try asking about:")
+        print("   • Planets (earth, mars, jupiter)")
+        print("   • ISS location")
+        print("   • SpaceX missions")
+        print("   • Fun facts")
         
 except Exception as e:
-    print("__START_RESULT__")
-    print(json.dumps({"error": str(e), "query": ${JSON.stringify(question)}}, indent=2))
-    print("__END_RESULT__")
+    print(f"Error: {str(e)}")
+    print()
+    print("💡 Try these queries:")
+    print("   • earth")
+    print("   • mars")
+    print("   • jupiter")
+    print("   • iss location")
+    print("   • spacex")
+
+print()
+print("=" * 50)
+print(f"✨ Query completed")
+print("=" * 50)
                 `;
                 
                 log('🚀 Calling cosmotalker.get()...', 'info');
                 
                 await pyodide.runPythonAsync(pythonCode);
                 
-                // Parse the result
                 const output = pyodide.runPython(`get_captured()`);
-                
-                // Extract JSON between markers
-                let resultData = null;
-                const startMarker = '__START_RESULT__';
-                const endMarker = '__END_RESULT__';
-                
-                const startIdx = output.indexOf(startMarker);
-                const endIdx = output.indexOf(endMarker);
-                
-                if (startIdx !== -1 && endIdx !== -1) {
-                    const jsonStr = output.substring(startIdx + startMarker.length, endIdx).trim();
-                    try {
-                        resultData = JSON.parse(jsonStr);
-                    } catch (e) {
-                        resultData = { raw: jsonStr };
-                    }
-                }
-                
                 const executionTime = ((performance.now() - startTime) / 1000).toFixed(3);
                 
-                if (resultData && !resultData.error) {
-                    log(`✅ Query completed in ${executionTime}s`, 'success');
-                    
-                    // Clean up the result - remove duplicate/unnecessary fields
-                    if (resultData.CosmoTalker) {
-                        resultData = resultData.CosmoTalker;
-                    }
-                    
-                    // Remove duplicate fields
-                    const cleanData = {};
-                    const seen = new Set();
-                    for (const [key, value] of Object.entries(resultData)) {
-                        if (!seen.has(key) && value !== null && value !== undefined) {
-                            cleanData[key] = value;
-                            seen.add(key);
-                        }
-                    }
-                    
-                    return {
-                        success: true,
-                        query: question,
-                        result: cleanData,
-                        execution_time: parseFloat(executionTime),
-                        timestamp: new Date().toISOString(),
-                        method: "cosmotalker.get()",
-                        version: "2.62"
-                    };
-                } else {
-                    return {
-                        success: false,
-                        query: question,
-                        result: null,
-                        error: resultData?.error || "No information found",
-                        execution_time: parseFloat(executionTime),
-                        timestamp: new Date().toISOString(),
-                        method: "cosmotalker.get()",
-                        version: "2.62"
-                    };
-                }
+                log(`✅ Query completed in ${executionTime}s`, 'success');
+                log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'system');
+                
+                return {
+                    success: true,
+                    query: question,
+                    answer: output,
+                    execution_time: parseFloat(executionTime),
+                    timestamp: new Date().toISOString(),
+                    method: "cosmotalker.get()",
+                    version: "2.62"
+                };
                 
             } catch (error) {
                 const executionTime = ((performance.now() - startTime) / 1000).toFixed(3);
@@ -356,8 +316,7 @@ except Exception as e:
                 return {
                     success: false,
                     query: question,
-                    result: null,
-                    error: error.message,
+                    answer: `Error: ${error.message}`,
                     execution_time: parseFloat(executionTime),
                     timestamp: new Date().toISOString(),
                     method: "cosmotalker.get()",
@@ -382,12 +341,14 @@ except Exception as e:
                 log('   • ?q=spacex', 'info');
                 log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'system');
                 
-                renderJSON({
+                const errorResponse = {
                     success: false,
                     error: "Missing 'q' parameter",
                     examples: ["?q=earth", "?q=mars", "?q=jupiter", "?q=iss location", "?q=spacex"],
                     timestamp: new Date().toISOString()
-                });
+                };
+                
+                renderTextAnswer(errorResponse.error, errorResponse);
                 return;
             }
             
@@ -396,26 +357,26 @@ except Exception as e:
             } catch(e) {}
             
             const result = await executeQuery(question);
-            renderJSON(result);
+            renderTextAnswer(result.answer, result);
         }
         
-        function renderJSON(data) {
-            const jsonString = JSON.stringify(data, null, 2);
-            
-            // Syntax highlight JSON
-            const highlighted = jsonString
-                .replace(/"([^"]+)":/g, '<span class="key">"$1"</span>:')
-                .replace(/: "([^"]*)"/g, ': <span class="string">"$1"</span>')
-                .replace(/: (\d+\.?\d*)/g, ': <span class="number">$1</span>');
-            
+        function renderTextAnswer(answer, metadata) {
             const resultDiv = document.createElement('div');
-            resultDiv.className = `result-box`;
+            resultDiv.className = `result-box ${!metadata.success ? 'error-box' : ''}`;
+            
+            // Convert answer to readable paragraphs
+            let formattedAnswer = answer
+                .replace(/\n/g, '<br>')
+                .replace(/•/g, '<span style="color: #a78bfa;">•</span>')
+                .replace(/=/g, '<span style="color: #334155;">─</span>');
+            
             resultDiv.innerHTML = `
                 <div class="result-header">
-                    ${data.success ? '✅ API Response (Structured JSON)' : '⚠️ API Response'}
+                    📡 CosmoTalker Response
+                    ${metadata.execution_time ? `<span style="float: right; font-size: 11px;">⚡ ${metadata.execution_time}s</span>` : ''}
                 </div>
-                <div class="json-response">
-                    <pre>${highlighted}</pre>
+                <div class="answer-text">
+                    ${formattedAnswer}
                 </div>
             `;
             
