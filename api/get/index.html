@@ -3,104 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CosmoTalker API</title>
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.29.3/full/pyodide.js"></script>
-    <script>
-        // API Handler - Converts Python CosmoTalker calls to JSON
-        (async function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const query = urlParams.get('q');
-            
-            if (!query) {
-                sendErrorResponse('Missing "q" parameter. Usage: ?q=planet_name');
-                return;
-            }
-
-            // Initialize Pyodide
-            let pyodide = await loadPyodide({
-                indexURL: "https://cdn.jsdelivr.net/pyodide/v0.29.3/full/",
-                stdout: (text) => console.log('[Python]', text),
-                stderr: (text) => console.error('[Python Error]', text)
-            });
-
-            // Setup Python environment
-            await pyodide.loadPackage("micropip");
-            const micropip = pyodide.pyimport("micropip");
-            
-            // Install CosmoTalker
-            await micropip.install(["cosmodb", "cosmotalker==2.62"]);
-            
-            // Mock GUI modules
-            await pyodide.runPythonAsync(`
-import sys
-import types
-import json
-
-# Mock tkinter for browser
-sys.modules['tkinter'] = types.ModuleType('tkinter')
-sys.modules['tkinter.messagebox'] = types.ModuleType('tkinter.messagebox')
-sys.modules['tkinter.ttk'] = types.ModuleType('tkinter.ttk')
-sys.modules['customtkinter'] = types.ModuleType('customtkinter')
-
-import cosmotalker as ct
-
-class CosmoAPI:
-    @staticmethod
-    def get_data(query):
-        """Universal getter that returns JSON-serializable data"""
-        try:
-            # Try planet info first
-            if hasattr(ct, 'planet_info'):
-                result = ct.planet_info(query)
-                if result:
-                    return {"status": "success", "data": result, "query": query}
-            
-            # Try search function
-            if hasattr(ct, 'search'):
-                result = ct.search(query)
-                if result:
-                    return {"status": "success", "data": result, "query": query}
-            
-            # Try direct get method
-            if hasattr(ct, 'get'):
-                result = ct.get(query)
-                if result:
-                    return {"status": "success", "data": result, "query": query}
-            
-            return {"status": "error", "message": f"No data found for '{query}'", "query": query}
-        
-        except Exception as e:
-            return {"status": "error", "message": str(e), "query": query}
-            `);
-
-            // Execute query and capture result
-            try {
-                const result = await pyodide.runPythonAsync(`
-import json
-api = CosmoAPI()
-result = api.get_data(${JSON.stringify(query)})
-json.dumps(result, default=str)
-`);
-                sendJsonResponse(result);
-            } catch (err) {
-                sendErrorResponse(`Execution error: ${err.message}`);
-            }
-        })();
-
-        function sendJsonResponse(data) {
-            // Set CORS headers and content type
-            const response = { status: "success", data: data };
-            document.body.innerHTML = `<pre>${JSON.stringify(response, null, 2)}</pre>`;
-        }
-
-        function sendErrorResponse(message) {
-            const error = { status: "error", message: message };
-            document.body.innerHTML = `<pre>${JSON.stringify(error, null, 2)}</pre>`;
-        }
-    </script>
+    <title>CosmoTalker API - High Performance</title>
     <style>
         body { 
-            font-family: monospace; 
+            font-family: 'JetBrains Mono', monospace; 
             padding: 20px; 
             background: #0a0e27; 
             color: #e0e0e0;
@@ -113,12 +19,116 @@ json.dumps(result, default=str)
             overflow-x: auto;
             border-left: 3px solid #a855f7;
         }
+        .status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            background: #1a1f3a;
+            border: 1px solid #a855f7;
+        }
     </style>
 </head>
 <body>
+    <div class="status" id="status">🌌 Initializing...</div>
     <div style="text-align: center; padding: 40px;">
-        <h2>🌌 CosmoTalker API</h2>
-        <p>Loading cosmic data...</p>
+        <h2>🚀 CosmoTalker High-Performance API</h2>
+        <p>Powered by Web Worker + Pyodide</p>
+        <pre id="output">Loading cosmic engine...</pre>
     </div>
+
+    <script>
+        let worker = null;
+        let requestId = 0;
+        const pendingRequests = new Map();
+
+        async function initWorker() {
+            worker = new Worker('worker.js');
+            
+            worker.onmessage = function(event) {
+                const { id, type, result, message, status } = event.data;
+                
+                if (type === 'status') {
+                    updateStatus(status, message);
+                } else if (type === 'response' && pendingRequests.has(id)) {
+                    const { resolve } = pendingRequests.get(id);
+                    pendingRequests.delete(id);
+                    resolve(result);
+                } else if (type === 'error') {
+                    console.error('Worker error:', message);
+                    updateStatus('error', message);
+                }
+            };
+            
+            // Wait for worker to be ready
+            return new Promise((resolve) => {
+                const checkReady = (event) => {
+                    if (event.data.type === 'status' && event.data.ready) {
+                        worker.removeEventListener('message', checkReady);
+                        resolve();
+                    }
+                };
+                worker.addEventListener('message', checkReady);
+            });
+        }
+
+        function updateStatus(status, message) {
+            const statusEl = document.getElementById('status');
+            const icons = {
+                initializing: '🌌',
+                loading_packages: '📦',
+                installing: '🔧',
+                configuring: '⚙️',
+                ready: '✅',
+                error: '❌'
+            };
+            statusEl.innerHTML = `${icons[status] || '🔄'} ${message || status}`;
+        }
+
+        async function apiRequest(type, payload) {
+            if (!worker) {
+                await initWorker();
+            }
+            
+            const id = requestId++;
+            return new Promise((resolve) => {
+                pendingRequests.set(id, { resolve });
+                worker.postMessage({ id, type, payload });
+            });
+        }
+
+        // Main API handler for URL queries
+        (async function() {
+            await initWorker();
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const query = urlParams.get('q');
+            const method = urlParams.get('method') || 'auto';
+            
+            if (!query) {
+                const error = {
+                    status: 'error',
+                    message: 'Missing "q" parameter. Usage: ?q=mars&method=auto',
+                    example: '/api/get/?q=jupiter',
+                    available_methods: ['auto', 'planet_info', 'search', 'get', 'fun_fact']
+                };
+                document.getElementById('output').innerHTML = JSON.stringify(error, null, 2);
+                return;
+            }
+            
+            updateStatus('querying', `Searching for "${query}"...`);
+            
+            const result = await apiRequest('query', { query, method });
+            document.getElementById('output').innerHTML = JSON.stringify(result, null, 2);
+            
+            if (result.status === 'success') {
+                updateStatus('ready', `✓ Data retrieved for "${query}"`);
+            } else {
+                updateStatus('error', result.message);
+            }
+        })();
+    </script>
 </body>
 </html>
