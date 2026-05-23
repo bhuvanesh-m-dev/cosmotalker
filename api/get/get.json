@@ -6,58 +6,35 @@
     <script src="https://cdn.jsdelivr.net/pyodide/v0.29.3/full/pyodide.js"></script>
 </head>
 <body>
-    <script>
-        // CosmoTalker JSON API v2.62 - Pure JSON output
-        // No HTML, no console styling - just raw JSON responses
+<script>
+// CosmoTalker JSON API v2.62 - Pure JSON output
+let pyodide = null;
+let isReady = false;
+
+async function initCosmoTalker() {
+    if (isReady && pyodide) return pyodide;
+    
+    try {
+        // Load Pyodide
+        pyodide = await loadPyodide({
+            indexURL: "https://cdn.jsdelivr.net/pyodide/v0.29.3/full/",
+            stdout: (text) => {},
+            stderr: (text) => {}
+        });
         
-        let pyodide = null;
-        let isReady = false;
-        
-        // Silent logging for debugging (optional - remove in production)
-        function debugLog(message, type = 'info') {
-            console.log(`[${type}]`, message);
-        }
-        
-        async function initCosmoTalker() {
-            if (isReady && pyodide) return pyodide;
-            
-            debugLog('Initializing CosmoTalker...', 'system');
-            
-            try {
-                // Load Pyodide
-                debugLog('Loading Pyodide...', 'info');
-                const loadStart = performance.now();
-                
-                pyodide = await loadPyodide({
-                    indexURL: "https://cdn.jsdelivr.net/pyodide/v0.29.3/full/",
-                    stdout: (text) => {
-                        // Silent capture - don't output to JSON
-                        debugLog(`[Python stdout] ${text}`, 'stdout');
-                    },
-                    stderr: (text) => {
-                        debugLog(`[Python stderr] ${text}`, 'error');
-                    }
-                });
-                
-                const loadTime = ((performance.now() - loadStart) / 1000).toFixed(2);
-                debugLog(`Pyodide loaded in ${loadTime}s`, 'success');
-                
-                // Setup Python output capture
-                pyodide.runPython(`
+        // Setup Python output capture
+        pyodide.runPython(`
 import sys
 import io
 
 class OutputCapture:
     def __init__(self):
         self.buffer = io.StringIO()
-    
     def write(self, text):
         if text and text.strip():
             self.buffer.write(text)
-    
     def get_output(self):
         return self.buffer.getvalue()
-    
     def clear(self):
         self.buffer = io.StringIO()
 
@@ -70,197 +47,155 @@ def get_captured():
 
 def clear_capture():
     _capture.clear()
-                `);
-                
-                // Install micropip
-                debugLog('Loading micropip...', 'info');
-                await pyodide.loadPackage("micropip");
-                debugLog('micropip ready', 'success');
-                
-                const micropip = pyodide.pyimport("micropip");
-                
-                // Install CosmoTalker v2.62
-                debugLog('Installing CosmoTalker v2.62...', 'info');
-                const installStart = performance.now();
-                
-                await micropip.install("cosmotalker==2.62");
-                await micropip.install(["cosmodb", "requests", "pytz"]);
-                
-                const installTime = ((performance.now() - installStart) / 1000).toFixed(2);
-                debugLog(`CosmoTalker v2.62 installed in ${installTime}s`, 'success');
-                
-                // Configure CosmoTalker for browser
-                pyodide.runPython(`
+        `);
+        
+        // Install micropip and CosmoTalker
+        await pyodide.loadPackage("micropip");
+        const micropip = pyodide.pyimport("micropip");
+        
+        await micropip.install("cosmotalker==2.62");
+        await micropip.install(["cosmodb", "requests", "pytz"]);
+        
+        // Configure CosmoTalker for browser
+        pyodide.runPython(`
 import sys
 import types
 
-# Mock tkinter modules (not available in browser)
 for mod in ['tkinter', 'tkinter.messagebox', 'tkinter.ttk', 'customtkinter']:
     sys.modules[mod] = types.ModuleType(mod)
 
-# Import CosmoTalker
 import cosmotalker as ct
 
-# Disable image preview (not supported in browser)
 class DummyImg:
     def __call__(self, *args, **kwargs):
-        return "⚠️ Image preview not available in web version"
+        return ""
 
 ct.img = DummyImg()
-                `);
-                
-                debugLog('CosmoTalker initialization complete!', 'success');
-                isReady = true;
-                return pyodide;
-                
-            } catch (error) {
-                debugLog(`Initialization failed: ${error.message}`, 'error');
-                throw error;
-            }
-        }
+        `);
         
-        async function executeQuery(question) {
-            const startTime = performance.now();
-            
-            try {
-                await initCosmoTalker();
-                
-                // Clear previous output
-                pyodide.runPython(`clear_capture()`);
-                
-                // Use cosmotalker.get()
-                const pythonCode = `
+        isReady = true;
+        return pyodide;
+        
+    } catch (error) {
+        throw error;
+    }
+}
+
+async function executeQuery(question) {
+    const startTime = performance.now();
+    
+    try {
+        await initCosmoTalker();
+        pyodide.runPython(`clear_capture()`);
+        
+        const pythonCode = `
 import cosmotalker as ct
 
 try:
-    # Use the unified get() function
     result = ct.get(${JSON.stringify(question)})
-    
     if result and str(result).strip():
         print(result)
     else:
         print("")
-        
 except Exception as e:
     print(f"ERROR: {str(e)}")
-                `;
-                
-                // Execute with timeout
-                const executionPromise = pyodide.runPythonAsync(pythonCode);
-                const timeoutPromise = new Promise((_, reject) => {
-                    setTimeout(() => reject(new Error("Timeout (30s)")), 30000);
-                });
-                
-                await Promise.race([executionPromise, timeoutPromise]);
-                
-                // Get captured output
-                let output = pyodide.runPython(`get_captured()`);
-                output = output.trim();
-                
-                const executionTime = ((performance.now() - startTime) / 1000).toFixed(3);
-                
-                // Check if output is empty or contains error
-                if (output && output.length > 0 && !output.includes('ERROR:')) {
-                    return {
-                        success: true,
-                        query: question,
-                        result: output,
-                        execution_time: parseFloat(executionTime),
-                        timestamp: new Date().toISOString(),
-                        method: "cosmotalker.get()",
-                        version: "2.62"
-                    };
-                } else if (output.includes('ERROR:')) {
-                    return {
-                        success: false,
-                        query: question,
-                        result: null,
-                        error: output.replace('ERROR:', '').trim(),
-                        execution_time: parseFloat(executionTime),
-                        timestamp: new Date().toISOString(),
-                        method: "cosmotalker.get()",
-                        version: "2.62"
-                    };
-                } else {
-                    return {
-                        success: false,
-                        query: question,
-                        result: null,
-                        error: "No information found for this query",
-                        suggestions: ["earth", "mars", "jupiter", "iss location", "spacex", "fun fact", "black hole", "moon"],
-                        execution_time: parseFloat(executionTime),
-                        timestamp: new Date().toISOString(),
-                        method: "cosmotalker.get()",
-                        version: "2.62"
-                    };
-                }
-                
-            } catch (error) {
-                const executionTime = ((performance.now() - startTime) / 1000).toFixed(3);
-                
-                return {
-                    success: false,
-                    query: question,
-                    result: null,
-                    error: error.message,
-                    execution_time: parseFloat(executionTime),
-                    timestamp: new Date().toISOString(),
-                    method: "cosmotalker.get()",
-                    version: "2.62"
-                };
-            }
+        `;
+        
+        const executionPromise = pyodide.runPythonAsync(pythonCode);
+        const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error("Timeout (30s)")), 30000);
+        });
+        
+        await Promise.race([executionPromise, timeoutPromise]);
+        
+        let output = pyodide.runPython(`get_captured()`);
+        output = output.trim();
+        
+        const executionTime = ((performance.now() - startTime) / 1000).toFixed(3);
+        
+        if (output && output.length > 0 && !output.includes('ERROR:')) {
+            return {
+                success: true,
+                query: question,
+                result: output,
+                execution_time: parseFloat(executionTime),
+                timestamp: new Date().toISOString(),
+                method: "cosmotalker.get()",
+                version: "2.62"
+            };
+        } else if (output.includes('ERROR:')) {
+            return {
+                success: false,
+                query: question,
+                result: null,
+                error: output.replace('ERROR:', '').trim(),
+                execution_time: parseFloat(executionTime),
+                timestamp: new Date().toISOString(),
+                method: "cosmotalker.get()",
+                version: "2.62"
+            };
+        } else {
+            return {
+                success: false,
+                query: question,
+                result: null,
+                error: "No information found for this query",
+                suggestions: ["earth", "mars", "jupiter", "iss location", "spacex", "fun fact", "black hole", "moon"],
+                execution_time: parseFloat(executionTime),
+                timestamp: new Date().toISOString(),
+                method: "cosmotalker.get()",
+                version: "2.62"
+            };
         }
         
-        async function handleJSONRequest() {
-            const urlParams = new URLSearchParams(window.location.search);
-            let question = urlParams.get('q') || urlParams.get('query') || urlParams.get('question');
-            
-            // Clear any existing body content
-            document.body.innerHTML = '';
-            document.body.style.margin = '0';
-            document.body.style.padding = '0';
-            document.body.style.background = 'transparent';
-            
-            // No question provided
-            if (!question) {
-                const errorResponse = {
-                    success: false,
-                    error: "Missing 'q' parameter",
-                    message: "Please provide a question using the 'q' parameter",
-                    examples: [
-                        "?q=earth",
-                        "?q=mars", 
-                        "?q=jupiter",
-                        "?q=iss location",
-                        "?q=spacex",
-                        "?q=fun fact",
-                        "?q=black hole",
-                        "?q=moon"
-                    ],
-                    documentation: "https://github.com/bhuvanesh-m-dev/cosmotalker",
-                    timestamp: new Date().toISOString()
-                };
-                
-                // Output pure JSON
-                document.body.textContent = JSON.stringify(errorResponse, null, 2);
-                return;
-            }
-            
-            try {
-                question = decodeURIComponent(question);
-            } catch(e) {
-                // If decoding fails, use as-is
-            }
-            
-            // Execute the query and get JSON result
-            const result = await executeQuery(question);
-            
-            // Output pure JSON
-            document.body.textContent = JSON.stringify(result, null, 2);
-        }
-        
-        // Start the JSON API
-        handleJSONRequest();
-    </script>
+    } catch (error) {
+        const executionTime = ((performance.now() - startTime) / 1000).toFixed(3);
+        return {
+            success: false,
+            query: question,
+            result: null,
+            error: error.message,
+            execution_time: parseFloat(executionTime),
+            timestamp: new Date().toISOString(),
+            method: "cosmotalker.get()",
+            version: "2.62"
+        };
+    }
+}
+
+async function handleJSONRequest() {
+    const urlParams = new URLSearchParams(window.location.search);
+    let question = urlParams.get('q') || urlParams.get('query') || urlParams.get('question');
+    
+    // Clear HTML and set for pure JSON output
+    document.body.innerHTML = '';
+    document.body.style.margin = '0';
+    document.body.style.padding = '0';
+    document.body.style.backgroundColor = 'transparent';
+    
+    if (!question) {
+        const errorResponse = {
+            success: false,
+            error: "Missing 'q' parameter",
+            message: "Please provide a question using the 'q' parameter",
+            examples: ["?q=earth", "?q=mars", "?q=jupiter", "?q=iss location", "?q=spacex", "?q=fun fact"],
+            timestamp: new Date().toISOString()
+        };
+        document.body.textContent = JSON.stringify(errorResponse, null, 2);
+        return;
+    }
+    
+    try {
+        question = decodeURIComponent(question);
+    } catch(e) {}
+    
+    const result = await executeQuery(question);
+    // Output pure JSON - no HTML wrapper
+    document.body.textContent = JSON.stringify(result, null, 2);
+}
+
+// Start the JSON API
+handleJSONRequest();
+</script>
 </body>
 </html>
