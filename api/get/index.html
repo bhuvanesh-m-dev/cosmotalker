@@ -1,48 +1,54 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
     <title>CosmoTalker JSON API</title>
     <script src="https://cdn.jsdelivr.net/pyodide/v0.29.3/full/pyodide.js"></script>
     <script>
-        // Pure JSON API endpoint - No HTML output, just JSON
+        // COSMOTALKER PURE JSON API
+        // Returns ONLY JSON - no HTML wrapper
+        // Usage: /api/get/?q=planet_name
+        
         (async function() {
             const urlParams = new URLSearchParams(window.location.search);
             const query = urlParams.get('q');
             const method = urlParams.get('method') || 'auto';
-            const callback = urlParams.get('callback'); // JSONP support
             
-            let pyodide = null;
-            
-            async function sendJsonResponse(data) {
-                const jsonStr = JSON.stringify(data, null, 2);
+            // Helper to send JSON response
+            function sendJSON(data) {
+                // Clear any existing content
+                document.body.innerHTML = '';
+                document.body.style.margin = '0';
+                document.body.style.padding = '0';
+                document.body.style.backgroundColor = '#0a0e27';
                 
-                // Support JSONP if callback parameter provided
-                if (callback && /^[a-zA-Z0-9_]+$/.test(callback)) {
-                    document.write(`${callback}(${jsonStr});`);
-                    document.close();
-                } else {
-                    // Pure JSON output
-                    document.body.style.margin = '0';
-                    document.body.style.padding = '0';
-                    document.body.style.background = '#0a0e27';
-                    document.body.style.fontFamily = 'monospace';
-                    const pre = document.createElement('pre');
-                    pre.style.margin = '0';
-                    pre.style.padding = '20px';
-                    pre.style.color = '#e0e0e0';
-                    pre.style.background = '#1a1f3a';
-                    pre.style.minHeight = '100vh';
-                    pre.textContent = jsonStr;
-                    document.body.appendChild(pre);
-                }
+                // Create pre element for JSON
+                const pre = document.createElement('pre');
+                pre.style.margin = '0';
+                pre.style.padding = '20px';
+                pre.style.fontFamily = 'monospace';
+                pre.style.fontSize = '14px';
+                pre.style.color = '#e0e0e0';
+                pre.style.backgroundColor = '#1a1f3a';
+                pre.style.minHeight = '100vh';
+                pre.style.overflow = 'auto';
+                pre.textContent = JSON.stringify(data, null, 2);
+                document.body.appendChild(pre);
             }
             
-            if (!query) {
-                await sendJsonResponse({
+            // Validate query parameter
+            if (!query || query.trim() === '') {
+                sendJSON({
                     status: 'error',
-                    message: 'Missing "q" parameter. Usage: ?q=planet_name',
-                    example: '/api/get/?q=jupiter',
+                    error_code: 'MISSING_PARAMETER',
+                    message: 'Missing "q" parameter. Please provide a planet name or search term.',
+                    usage: {
+                        example: '/api/get/?q=jupiter',
+                        parameters: {
+                            q: 'string (required) - Planet name or search term',
+                            method: 'string (optional) - auto, planet_info, get, search, fun_fact'
+                        }
+                    },
                     timestamp: new Date().toISOString()
                 });
                 return;
@@ -50,10 +56,10 @@
             
             try {
                 // Initialize Pyodide
-                pyodide = await loadPyodide({
+                let pyodide = await loadPyodide({
                     indexURL: "https://cdn.jsdelivr.net/pyodide/v0.29.3/full/",
-                    stdout: () => {},  // Silence stdout
-                    stderr: () => {}   // Silence stderr
+                    stdout: () => {},
+                    stderr: () => {}
                 });
                 
                 // Load micropip
@@ -63,20 +69,17 @@
                 // Install CosmoTalker
                 await micropip.install(["cosmodb", "cosmotalker==2.62"]);
                 
-                // Setup Python environment WITHOUT js module
+                // Setup Python environment
                 await pyodide.runPythonAsync(`
 import sys
 import types
 import json
 from datetime import datetime
 
-# Mock problematic modules
-sys.modules['js'] = types.ModuleType('js')
-sys.modules['window'] = types.ModuleType('window')
-sys.modules['tkinter'] = types.ModuleType('tkinter')
-sys.modules['tkinter.messagebox'] = types.ModuleType('tkinter.messagebox')
-sys.modules['tkinter.ttk'] = types.ModuleType('tkinter.ttk')
-sys.modules['customtkinter'] = types.ModuleType('customtkinter')
+# Mock all problematic modules for browser
+mock_modules = ['js', 'window', 'tkinter', 'tkinter.messagebox', 'tkinter.ttk', 'customtkinter']
+for module in mock_modules:
+    sys.modules[module] = types.ModuleType(module)
 
 # Import CosmoTalker
 import cosmotalker as ct
@@ -84,95 +87,96 @@ import cosmotalker as ct
 class CosmoTalkerAPI:
     @staticmethod
     def get_data(query, method='auto'):
-        """Get data without any browser-specific dependencies"""
         result = None
         used_method = method
         
-        try:
-            if method == 'auto' or method == 'planet_info':
-                try:
-                    if hasattr(ct, 'planet_info'):
-                        result = ct.planet_info(query)
-                        if result and result != {}:
-                            used_method = 'planet_info'
-                except:
-                    pass
-            
-            if (not result or result == {}) and (method == 'auto' or method == 'get'):
-                try:
-                    if hasattr(ct, 'get'):
-                        result = ct.get(query)
-                        if result and result != {}:
-                            used_method = 'get'
-                except:
-                    pass
-            
-            if (not result or result == {}) and (method == 'auto' or method == 'search'):
-                try:
-                    if hasattr(ct, 'search'):
-                        result = ct.search(query)
-                        if result and result != {}:
-                            used_method = 'search'
-                except:
-                    pass
-            
-            if (not result or result == {}) and (method == 'auto' or method == 'fun_fact'):
-                try:
-                    if hasattr(ct, 'get_fun_fact'):
-                        result = ct.get_fun_fact(query)
-                        if result and result != {}:
-                            used_method = 'fun_fact'
-                except:
-                    pass
-            
-            if not result or result == {}:
-                return {
-                    'status': 'error',
-                    'message': f'No data found for "{query}"',
-                    'query': query,
-                    'method_attempted': method,
-                    'timestamp': datetime.now().isoformat()
-                }
-            
-            # Convert result to serializable format
-            if hasattr(result, '__dict__'):
-                result = result.__dict__
-            elif hasattr(result, 'to_dict'):
-                result = result.to_dict()
-            
-            return {
-                'status': 'success',
-                'data': result,
-                'query': query,
-                'method': used_method,
-                'timestamp': datetime.now().isoformat()
-            }
-            
-        except Exception as e:
-            return {
-                'status': 'error',
-                'message': str(e),
-                'query': query,
-                'method': method,
-                'timestamp': datetime.now().isoformat()
-            }
+        # Try planet_info
+        if method == 'auto' or method == 'planet_info':
+            try:
+                if hasattr(ct, 'planet_info'):
+                    result = ct.planet_info(query)
+                    if result and result != {}:
+                        used_method = 'planet_info'
+                        return CosmoTalkerAPI.format_result(result, query, used_method)
+            except:
+                pass
+        
+        # Try get method
+        if method == 'auto' or method == 'get':
+            try:
+                if hasattr(ct, 'get'):
+                    result = ct.get(query)
+                    if result and result != {}:
+                        used_method = 'get'
+                        return CosmoTalkerAPI.format_result(result, query, used_method)
+            except:
+                pass
+        
+        # Try search
+        if method == 'auto' or method == 'search':
+            try:
+                if hasattr(ct, 'search'):
+                    result = ct.search(query)
+                    if result and result != {}:
+                        used_method = 'search'
+                        return CosmoTalkerAPI.format_result(result, query, used_method)
+            except:
+                pass
+        
+        # Try fun fact
+        if method == 'auto' or method == 'fun_fact':
+            try:
+                if hasattr(ct, 'get_fun_fact'):
+                    result = ct.get_fun_fact(query)
+                    if result and result != {}:
+                        used_method = 'fun_fact'
+                        return CosmoTalkerAPI.format_result(result, query, used_method)
+            except:
+                pass
+        
+        # No result found
+        return {
+            'status': 'error',
+            'error_code': 'NO_DATA_FOUND',
+            'message': f'No data found for "{query}"',
+            'query': query,
+            'method_attempted': method,
+            'suggestions': ['Earth', 'Mars', 'Jupiter', 'Saturn', 'Venus', 'Mercury', 'Neptune', 'Uranus', 'Pluto', 'black hole', 'andromeda'],
+            'timestamp': datetime.now().isoformat()
+        }
+    
+    @staticmethod
+    def format_result(result, query, used_method):
+        # Convert result to serializable format
+        if hasattr(result, '__dict__'):
+            result = result.__dict__
+        elif hasattr(result, 'to_dict') and callable(result.to_dict):
+            result = result.to_dict()
+        
+        return {
+            'status': 'success',
+            'data': result,
+            'query': query,
+            'method': used_method,
+            'timestamp': datetime.now().isoformat()
+        }
 
 api = CosmoTalkerAPI()
-print("Ready")
                 `);
                 
-                // Execute query
+                // Execute query and get JSON
                 const result = await pyodide.runPythonAsync(`
 import json
 result = api.get_data(${JSON.stringify(query)}, ${JSON.stringify(method)})
 json.dumps(result)
                 `);
                 
-                await sendJsonResponse(JSON.parse(result));
+                sendJSON(JSON.parse(result));
                 
             } catch (error) {
-                await sendJsonResponse({
+                sendJSON({
                     status: 'error',
+                    error_code: 'EXECUTION_ERROR',
                     message: error.message,
                     query: query,
                     method: method,
