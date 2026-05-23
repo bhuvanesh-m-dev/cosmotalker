@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CosmoTalker API — Documentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #04060f;
+    --surface: #080d1e;
+    --surface2: #0c1228;
+    --border: #1a2444;
+    --accent: #00d4ff;
+    --accent2: #7c3aff;
+    --accent3: #ff6b35;
+    --text: #c8d8f0;
+    --text-dim: #5a7090;
+    --text-bright: #eaf2ff;
+    --glow: 0 0 20px rgba(0, 212, 255, 0.3);
+    --glow2: 0 0 20px rgba(124, 58, 255, 0.3);
+    --mono: 'Space Mono', monospace;
+    --display: 'Orbitron', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 14px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* Starfield */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 25% 60%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 40% 30%, rgba(255,255,255,0.7) 0%, transparent 100%),
+      radial-gradient(1px 1px at 55% 80%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 70% 20%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 80% 65%, rgba(255,255,255,0.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 90% 45%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 15% 85%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 60% 50%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(2px 2px at 35% 10%, rgba(0,212,255,0.4) 0%, transparent 100%),
+      radial-gradient(2px 2px at 75% 90%, rgba(124,58,255,0.4) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Nav */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: rgba(4, 6, 15, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    height: 60px;
+  }
+
+  .nav-logo {
+    font-family: var(--display);
+    font-size: 14px;
+    font-weight: 900;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-shadow: var(--glow);
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 30px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--accent); }
+
+  /* Main Layout */
+  .layout {
+    display: flex;
+    min-height: 100vh;
+    padding-top: 60px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 60px;
+    height: calc(100vh - 60px);
+    overflow-y: auto;
+    padding: 30px 0;
+    border-right: 1px solid var(--border);
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .sidebar-section {
+    margin-bottom: 30px;
+  }
+
+  .sidebar-label {
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding: 0 24px 8px;
+    display: block;
+  }
+
+  .sidebar a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 24px;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    transition: all 0.2s;
+    border-left: 2px solid transparent;
+    margin-left: -1px;
+  }
+
+  .sidebar a:hover,
+  .sidebar a.active {
+    color: var(--accent);
+    border-left-color: var(--accent);
+    background: rgba(0, 212, 255, 0.05);
+  }
+
+  .lang-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* Content */
+  .content {
+    flex: 1;
+    max-width: 900px;
+    padding: 60px 60px 120px;
+  }
+
+  /* Hero */
+  .hero {
+    margin-bottom: 80px;
+  }
+
+  .hero-tag {
+    display: inline-block;
+    font-size: 10px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid rgba(0,212,255,0.3);
+    padding: 4px 12px;
+    border-radius: 2px;
+    margin-bottom: 24px;
+    animation: fadeSlideDown 0.6s ease both;
+  }
+
+  .hero h1 {
+    font-family: var(--display);
+    font-size: 48px;
+    font-weight: 900;
+    color: var(--text-bright);
+    line-height: 1.1;
+    margin-bottom: 20px;
+    animation: fadeSlideDown 0.6s ease 0.1s both;
+  }
+
+  .hero h1 span {
+    color: var(--accent);
+    text-shadow: var(--glow);
+  }
+
+  .hero-desc {
+    font-size: 15px;
+    color: var(--text-dim);
+    max-width: 560px;
+    line-height: 1.8;
+    animation: fadeSlideDown 0.6s ease 0.2s both;
+    margin-bottom: 32px;
+  }
+
+  .endpoint-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 20px;
+    animation: fadeSlideDown 0.6s ease 0.3s both;
+  }
+
+  .method-badge {
+    background: var(--accent2);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 3px 8px;
+    border-radius: 3px;
+  }
+
+  .endpoint-url {
+    color: var(--accent);
+    font-size: 13px;
+  }
+
+  /* Sections */
+  .section {
+    margin-bottom: 70px;
+    animation: fadeSlideDown 0.5s ease both;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .section-num {
+    font-family: var(--display);
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 2px;
+  }
+
+  .section-title {
+    font-family: var(--display);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-bright);
+    letter-spacing: 2px;
+  }
+
+  .section-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--border), transparent);
+  }
+
+  /* Code blocks */
+  .code-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 24px;
+    transition: border-color 0.2s;
+  }
+
+  .code-block:hover {
+    border-color: rgba(0,212,255,0.3);
+  }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 18px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .code-lang {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .copy-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1px;
+    padding: 4px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .copy-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .copy-btn.copied {
+    border-color: #00ff88;
+    color: #00ff88;
+  }
+
+  pre {
+    padding: 24px;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  code {
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--text);
+  }
+
+  /* Syntax highlighting */
+  .kw { color: #7c3aff; }
+  .fn { color: #00d4ff; }
+  .str { color: #ff6b35; }
+  .cm { color: #3a5070; font-style: italic; }
+  .num { color: #00ff88; }
+  .var { color: #c8d8f0; }
+
+  /* Try it panel */
+  .try-panel {
+    background: var(--surface);
+    border: 1px solid rgba(0,212,255,0.2);
+    border-radius: 8px;
+    padding: 32px;
+    margin-bottom: 40px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .try-panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(to right, var(--accent), var(--accent2));
+  }
+
+  .try-title {
+    font-family: var(--display);
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+
+  .try-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .try-input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 16px;
+    color: var(--text-bright);
+    font-family: var(--mono);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .try-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0,212,255,0.08);
+  }
+
+  .try-btn {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 6px;
+    padding: 12px 24px;
+    font-family: var(--display);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .try-btn:hover {
+    background: #33ddff;
+    box-shadow: var(--glow);
+    transform: translateY(-1px);
+  }
+
+  .try-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .try-output {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px;
+    min-height: 80px;
+    font-size: 13px;
+    color: var(--text);
+    display: none;
+    animation: fadeSlideDown 0.3s ease;
+  }
+
+  .try-output.visible { display: block; }
+  .try-output .label {
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .try-output .response-text { color: var(--text-bright); line-height: 1.7; }
+  .try-output .error-text { color: #ff6b35; }
+
+  /* Response schema */
+  .schema-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .schema-table th {
+    text-align: left;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .schema-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(26, 36, 68, 0.5);
+    vertical-align: top;
+  }
+
+  .schema-table tr:last-child td { border-bottom: none; }
+
+  .field-name { color: var(--accent); font-size: 12px; }
+  .field-type { color: var(--accent2); font-size: 11px; }
+  .field-desc { color: var(--text-dim); font-size: 12px; }
+
+  /* Quick ref */
+  .quick-ref {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .quick-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+    transition: all 0.2s;
+  }
+
+  .quick-card:hover {
+    border-color: rgba(0,212,255,0.3);
+    transform: translateY(-2px);
+  }
+
+  .quick-lang {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+  }
+
+  .quick-code {
+    font-size: 11px;
+    color: var(--accent);
+    word-break: break-all;
+    line-height: 1.6;
+  }
+
+  /* Badges & pills */
+  .cors-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0,255,136,0.1);
+    border: 1px solid rgba(0,255,136,0.3);
+    color: #00ff88;
+    font-size: 10px;
+    letter-spacing: 2px;
+    padding: 4px 10px;
+    border-radius: 3px;
+  }
+
+  .cors-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: #00ff88;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  @keyframes fadeSlideDown {
+    from { opacity: 0; transform: translateY(-12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .content { padding: 40px 24px 80px; }
+    .hero h1 { font-size: 32px; }
+    .quick-ref { grid-template-columns: 1fr; }
+    nav { padding: 0 20px; }
+    .nav-links { display: none; }
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-logo">COSMOTALKER</span>
+  <ul class="nav-links">
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#try">Try It</a></li>
+    <li><a href="#languages">Languages</a></li>
+    <li><a href="#response">Response</a></li>
+    <li><a href="#quickref">Quick Ref</a></li>
+  </ul>
+</nav>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <span class="sidebar-label">Getting Started</span>
+      <a href="#overview">Overview</a>
+      <a href="#try">Try the API</a>
+      <a href="#response">Response Schema</a>
+    </div>
+    <div class="sidebar-section">
+      <span class="sidebar-label">Code Examples</span>
+      <a href="#js"><span class="lang-dot" style="background:#f7df1e"></span>JavaScript</a>
+      <a href="#nodejs"><span class="lang-dot" style="background:#68a063"></span>Node.js</a>
+      <a href="#python"><span class="lang-dot" style="background:#3572A5"></span>Python</a>
+      <a href="#html"><span class="lang-dot" style="background:#e44d26"></span>HTML Page</a>
+      <a href="#php"><span class="lang-dot" style="background:#777bb4"></span>PHP</a>
+      <a href="#java"><span class="lang-dot" style="background:#b07219"></span>Java</a>
+      <a href="#csharp"><span class="lang-dot" style="background:#178600"></span>C# / .NET</a>
+      <a href="#ruby"><span class="lang-dot" style="background:#701516"></span>Ruby</a>
+      <a href="#go"><span class="lang-dot" style="background:#00ADD8"></span>Go</a>
+      <a href="#bash"><span class="lang-dot" style="background:#89e051"></span>Bash / cURL</a>
+    </div>
+    <div class="sidebar-section">
+      <span class="sidebar-label">Reference</span>
+      <a href="#quickref">Quick Reference</a>
+    </div>
+  </aside>
+
+  <main class="content">
+
+    <!-- HERO -->
+    <section class="hero" id="overview">
+      <div class="hero-tag">🚀 REST API · FREE · CORS ENABLED</div>
+      <h1>CosmoTalker<br><span>API Docs</span></h1>
+      <p class="hero-desc">Query real-time space information with a single GET request. Planets, ISS location, black holes, missions — answered in milliseconds.</p>
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+        <div class="endpoint-pill">
+          <span class="method-badge">GET</span>
+          <span class="endpoint-url">https://bhuvanesh-m-dev.github.io/cosmotalker/api/get?q={query}</span>
+        </div>
+        <span class="cors-badge"><span class="cors-dot"></span>CORS ENABLED</span>
+      </div>
+    </section>
+
+    <!-- TRY IT -->
+    <section class="section" id="try">
+      <div class="section-header">
+        <span class="section-num">00</span>
+        <span class="section-title">TRY IT LIVE</span>
+        <span class="section-line"></span>
+      </div>
+      <div class="try-panel">
+        <div class="try-title">LIVE PLAYGROUND</div>
+        <div class="try-row">
+          <input class="try-input" id="queryInput" type="text" placeholder='e.g. mars, iss location, black hole, spacex...' />
+          <button class="try-btn" id="tryBtn" onclick="runQuery()">LAUNCH</button>
+        </div>
+        <div class="try-output" id="tryOutput">
+          <div class="label">RESPONSE</div>
+          <div id="tryResult"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESPONSE SCHEMA -->
+    <section class="section" id="response">
+      <div class="section-header">
+        <span class="section-num">01</span>
+        <span class="section-title">RESPONSE FORMAT</span>
+        <span class="section-line"></span>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">📡 JSON Response</span>
+          <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><code>{
+  <span class="str">"success"</span>: <span class="kw">true</span>,
+  <span class="str">"query"</span>: <span class="str">"mars"</span>,
+  <span class="str">"answer"</span>: <span class="str">"Mars, the fourth planet from the Sun..."</span>,
+  <span class="str">"execution_time"</span>: <span class="num">0.452</span>,
+  <span class="str">"timestamp"</span>: <span class="str">"2026-05-23T02:30:00.000Z"</span>,
+  <span class="str">"method"</span>: <span class="str">"cosmotalker.get()"</span>
+}</code></pre>
+      </div>
+
+      <table class="schema-table">
+        <thead>
+          <tr>
+            <th>Field</th>
+            <th>Type</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="field-name">success</td><td class="field-type">boolean</td><td class="field-desc">Whether the request succeeded</td></tr>
+          <tr><td class="field-name">query</td><td class="field-type">string</td><td class="field-desc">The search term you sent</td></tr>
+          <tr><td class="field-name">answer</td><td class="field-type">string</td><td class="field-desc">Space information result</td></tr>
+          <tr><td class="field-name">execution_time</td><td class="field-type">number</td><td class="field-desc">Response time in seconds</td></tr>
+          <tr><td class="field-name">timestamp</td><td class="field-type">string</td><td class="field-desc">ISO 8601 timestamp</td></tr>
+          <tr><td class="field-name">method</td><td class="field-type">string</td><td class="field-desc">API method invoked</td></tr>
+          <tr><td class="field-name">error</td><td class="field-type">string</td><td class="field-desc">Error message (if success is false)</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- JAVASCRIPT -->
+    <section class="section" id="js">
+      <div class="section-header">
+        <span class="section-num">02</span>
+        <span class="section-title">JAVASCRIPT — BROWSER</span>
+        <span class="section-line"></span>
+      </div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang"><span class="lang-dot" style="background:#f7df1e;width:8px;height:8px;border-radius:50%;display:inline-block"></span> fetch API</span>
+          <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><code><span class="kw">async function</span> <span class="fn">getSpaceInfo</span>(question) {
+  <span class="kw">try</span> {
+    <span class="kw">const</span> response = <span class="kw">await</span> <span class="fn">fetch</span>(
+      <span class="str">`https://bhuvanesh-m-dev.github.io/cosmotalker/api/get?q=<span class="kw">${</span><span class="fn">encodeURIComponent</span>(question)<span class="kw">}</span>`</span>
+    );
+    <span class="kw">const</span> data = <span class="kw">await</span> response.<span class="fn">json</span>();
+
+    <span class="kw">if</span> (data.success) {
+      <span class="kw">return</span> data.answer;
+    } <span class="kw">else</span> {
+      <span class="kw">throw new</span> <span class="fn">Error</span>(data.error || <span class="str">"No information found"</span>);
+    }
+  } <span class="kw">catch</span> (error) {
+    console.<span class="fn">error</span>(<span class="str">"API Error:"</span>, error);
+  }
+}
+
+<span class="cm">// Usage</span>
+<span class="fn">getSpaceInfo</span>(<span class="str">"iss location"</span>).<span class="fn">then</span>(answer => {
+  document.<span class="fn">getElementById</span>(<span class="str">"result"</span>).innerText = answer;
+});</code></pre>
+      </div>
+    </section>
+
+    <!-- NODE.JS -->
+    <section class="section" id="nodejs">
+      <div class="section-header">
+        <span class="section-num">03</span>
+        <span class="section-title">NODE.JS</span>
+        <span class="section-line"></span>
+      </div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang"><span class="lang-dot" style="background:#68a063;width:8px;height:8px;border-radius:50%;display:inline-block"></span> ES Modules</span>
+          <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><code><span class="kw">import</span> fetch <span class="kw">from</span> <span class="str">'node-fetch'</span>;
+
+<span class="kw">async function</span> <span class="fn">askCosmoTalker</span>(question) {
+  <span class="kw">const</span> url = <span class="str">`https://bhuvanesh-m-dev.github.io/cosmotalker/api/get?q=<span class="kw">${</span><span class="fn">encodeURIComponent</span>(question)<span class="kw">}</span>`</span>;
+  <span class="kw">const</span> response = <span class="kw">await</span> <span class="fn">fetch</span>(url);
+  <span class="kw">const</span> data = <span class="kw">await</span> response.<span class="fn">json</span>();
+  <span class="kw">return</span> data;
+}
+
+<span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">askCosmoTalker</span>(<span class="str">"jupiter"</span>);
+console.<span class="fn">log</span>(result.answer);</code></pre>
+      </div>
+    </section>
+
+    <!-- PYTHON -->
+    <section class="section" id="python">
+      <div class="section-header">
+        <span class="section-num">04</span>
+        <span class="section-title">PYTHON</span>
+        <span class="section-line"></span>
+      </div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang"><span class="lang-dot" style="background:#3572A5;width:8px;height:8px;border-radius:50%;display:inline-block"></span> requests library</span>
+          <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><code><span class="kw">import</span> requests
+
+<span class="kw">def</span> <span class="fn">get_space_info</span>(question):
+    <span class="kw">try</span>:
+        response = requests.<span class="fn">get</span>(
+            <span class="str">"https://bhuvanesh-m-dev.github.io/cosmotalker/api/get"</span>,
+            params={<span class="str">"q"</span>: question},
+            timeout=<span class="num">30</span>
+        )
+        response.<span class="fn">raise_for_status</span>()
+        data = response.<span class="fn">json</span>()
+
+        <span class="kw">if</span> data.<span class="fn">get</span>(<span class="str">"success"</span>):
+            <span class="kw">return</span> data.<span class="fn">get</span>(<span class="str">"answer"</span>)
+        <span class="kw">else</span>:
+            <span class="kw">return</span> <span class="fn">f</span><span class="str">"Error: {data.get('error')}"</span>
+
+    <span class="kw">except</span> requests.exceptions.RequestException <span class="kw">as</span> e:
+        <span class="kw">return</span> <span class="fn">f</span><span class="str">"Connection error: {e}"</span>
+
+<span class="cm"># Usage</span>
+answer = <span class="fn">get_space_info</span>(<span class="str">"iss location"</span>)
+<span class="fn">print</span>(answer)</code></pre>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang"><span class="lang-dot" style="background:#3572A5;width:8px;height:8px;border-radius:50%;display:inline-block"></span> Async (aiohttp)</span>
+          <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><code><span class="kw">import</span> aiohttp, asyncio
+
+<span class="kw">async def</span> <span class="fn">ask_cosmotalker</span>(question):
+    url = <span class="str">"https://bhuvanesh-m-dev.github.io/cosmotalker/api/get"</span>
+    <span class="kw">async with</span> aiohttp.<span class="fn">ClientSession</span>() <span class="kw">as</span> session:
+        <span class="kw">async with</span> session.<span class="fn">get</span>(url, params={<span class="str">"q"</span>: question}) <span class="kw">as</span> resp:
+            <span class="kw">return</span> <span class="kw">await</span> resp.<span class="fn">json</span>()
+
+asyncio.<span class="fn">run</span>(<span class="fn">ask_cosmotalker</span>(<span class="str">"earth"</span>))</code></pre>
+      </div>
+    </section>
+
+    <!-- HTML -->
+    <section class="section" id="html">
+      <div class="section-header">
+        <span class="section-num">05</span>
+        <span class="section-title">HTML WEB PAGE</span>
+        <span class="section-line"></span>
+      </div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang"><span class="lang-dot" style="background:#e44d26;width:8px;height:8px;border-radius:50%;display:inline-block"></span> Complete standalone page</span>
+          <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><code><span class="kw">&lt;!DOCTYPE html&gt;</span>
+<span class="fn">&lt;html&gt;</span>
+<span class="fn">&lt;body&gt;</span>
+  <span class="fn">&lt;input</span> <span class="kw">type</span>=<span class="str">"text"</span> <span class="kw">id</span>=<span class="str">"q"</span> <span class="kw">placeholder</span>=<span class="str">"Ask about space..."</span><span class="fn">&gt;</span>
+  <span class="fn">&lt;button</span> <span class="kw">onclick</span>=<span class="str">"ask()"</span><span class="fn">&gt;</span>Ask<span class="fn">&lt;/button&gt;</span>
+  <span class="fn">&lt;div</span> <span class="kw">id</span>=<span class="str">"answer"</span><span class="fn">&gt;&lt;/div&gt;</span>
+
+  <span class="fn">&lt;script&gt;</span>
+    <span class="kw">async function</span> <span class="fn">ask</span>() {
+      <span class="kw">const</span> q = document.<span class="fn">getElementById</span>(<span class="str">'q'</span>).value;
+      <span class="kw">const</span> res = <span class="kw">await</span> <span class="fn">fetch</span>(
+        <span class="str">`https://bhuvanesh-m-dev.github.io/cosmotalker/api/get?q=<span class="kw">${</span><span class="fn">encodeURIComponent</span>(q)<span class="kw">}</span>`</span>
+      );
+      <span class="kw">const</span> data = <span class="kw">await</span> res.<span class="fn">json</span>();
+      document.<span class="fn">getElementById</span>(<span class="str">'answer'</span>).innerText = data.answer;
+    }
+  <span class="fn">&lt;/script&gt;</span>
+<span class="fn">&lt;/body&gt;</span>
+<span class="fn">&lt;/html&gt;</span></code></pre>
+      </div>
+    </section>
+
+    <!-- PHP -->
+    <section class="section" id="php">
+      <div class="section-header">
+        <span class="section-num">06</span>
+        <span class="section-title">PHP</span>
+        <span class="section-line"></span>
+      </div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang"><span class="lang-dot" style="background:#777bb4;width:8px;height:8px;border-radius:50%;display:inline-block"></span> cURL</span>
+          <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><code><span class="kw">&lt;?php</span>
+<span class="kw">function</span> <span class="fn">askCosmoTalker</span>(<span class="var">$question</span>) {
+    <span class="var">$params</span> = <span class="fn">http_build_query</span>([<span class="str">'q'</span> => <span class="var">$question</span>]);
+    <span class="var">$url</span> = <span class="str">"https://bhuvanesh-m-dev.github.io/cosmotalker/api/get?"</span> . <span class="var">$params</span>;
+
+    <span class="var">$ch</span> = <span class="fn">curl_init</span>();
+    <span class="fn">curl_setopt</span>(<span class="var">$ch</span>, CURLOPT_URL, <span class="var">$url</span>);
+    <span class="fn">curl_setopt</span>(<span class="var">$ch</span>, CURLOPT_RETURNTRANSFER, <span class="kw">true</span>);
+    <span class="fn">curl_setopt</span>(<span class="var">$ch</span>, CURLOPT_TIMEOUT, <span class="num">30</span>);
+
+    <span class="var">$response</span> = <span class="fn">curl_exec</span>(<span class="var">$ch</span>);
+    <span class="fn">curl_close</span>(<span class="var">$ch</span>);
+
+    <span class="kw">return</span> <span class="fn">json_decode</span>(<span class="var">$response</span>, <span class="kw">true</span>);
+}
+
+<span class="var">$result</span> = <span class="fn">askCosmoTalker</span>(<span class="str">"mars"</span>);
+<span class="kw">echo</span> <span class="var">$result</span>[<span class="str">'answer'</span>];
+<span class="kw">?&gt;</span></code></pre>
+      </div>
+    </section>
+
+    <!-- JAVA -->
+    <section class="section" id="java">
+      <div class="section-header">
+        <span class="section-num">07</span>
+        <span class="section-title">JAVA</span>
+        <span class="section-line"></span>
+      </div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang"><span class="lang-dot" style="background:#b07219;width:8px;height:8px;border-radius:50%;display:inline-block"></span> HttpClient (Java 11+)</span>
+          <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><code><span class="kw">import</span> java.net.http.*;
+<span class="kw">import</span> java.net.*;
+<span class="kw">import</span> java.net.URLEncoder;
+<span class="kw">import</span> java.nio.charset.StandardCharsets;
+
+<span class="kw">public class</span> <span class="fn">CosmoTalkerAPI</span> {
+    <span class="kw">private static final</span> HttpClient client = HttpClient.<span class="fn">newHttpClient</span>();
+
+    <span class="kw">public static</span> String <span class="fn">ask</span>(String question) <span class="kw">throws</span> Exception {
+        String encoded = URLEncoder.<span class="fn">encode</span>(question, StandardCharsets.UTF_8);
+        String url = <span class="str">"https://bhuvanesh-m-dev.github.io/cosmotalker/api/get?q="</span> + encoded;
+
+        HttpRequest request = HttpRequest.<span class="fn">newBuilder</span>()
+            .<span class="fn">uri</span>(URI.<span class="fn">create</span>(url))
+            .<span class="fn">GET</span>()
+            .<span class="fn">build</span>();
+
+        HttpResponse&lt;String&gt; response = client.<span class="fn">send</span>(
+            request, HttpResponse.BodyHandlers.<span class="fn">ofString</span>()
+        );
+        <span class="kw">return</span> response.<span class="fn">body</span>();
+    }
+}</code></pre>
+      </div>
+    </section>
+
+    <!-- C# -->
+    <section class="section" id="csharp">
+      <div class="section-header">
+        <span class="section-num">08</span>
+        <span class="section-title">C# / .NET</span>
+        <span class="section-line"></span>
+      </div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang"><span class="lang-dot" style="background:#178600;width:8px;height:8px;border-radius:50%;display:inline-block"></span> HttpClient async</span>
+          <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><code><span class="kw">using</span> System.Net.Http;
+
+<span class="kw">class</span> <span class="fn">CosmoTalkerAPI</span> {
+    <span class="kw">static readonly</span> HttpClient client = <span class="kw">new</span> <span class="fn">HttpClient</span>();
+
+    <span class="kw">public static async</span> Task&lt;string&gt; <span class="fn">Ask</span>(<span class="kw">string</span> question) {
+        <span class="kw">string</span> url = <span class="str">$"https://bhuvanesh-m-dev.github.io/cosmotalker/api/get?q={Uri.<span class="fn">EscapeDataString</span>(question)}"</span>;
+        HttpResponseMessage response = <span class="kw">await</span> client.<span class="fn">GetAsync</span>(url);
+        <span class="kw">return</span> <span class="kw">await</span> response.Content.<span class="fn">ReadAsStringAsync</span>();
+    }
+
+    <span class="kw">static async</span> Task <span class="fn">Main</span>() {
+        <span class="kw">string</span> result = <span class="kw">await</span> <span class="fn">Ask</span>(<span class="str">"iss location"</span>);
+        Console.<span class="fn">WriteLine</span>(result);
+    }
+}</code></pre>
+      </div>
+    </section>
+
+    <!-- RUBY -->
+    <section class="section" id="ruby">
+      <div class="section-header">
+        <span class="section-num">09</span>
+        <span class="section-title">RUBY</span>
+        <span class="section-line"></span>
+      </div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang"><span class="lang-dot" style="background:#701516;width:8px;height:8px;border-radius:50%;display:inline-block"></span> net/http</span>
+          <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><code><span class="kw">require</span> <span class="str">'net/http'</span>
+<span class="kw">require</span> <span class="str">'json'</span>
+<span class="kw">require</span> <span class="str">'uri'</span>
+
+<span class="kw">def</span> <span class="fn">ask_cosmotalker</span>(question)
+  url = URI(<span class="str">"https://bhuvanesh-m-dev.github.io/cosmotalker/api/get"</span>)
+  url.query = URI.<span class="fn">encode_www_form</span>({q: question})
+
+  response = Net::HTTP.<span class="fn">get_response</span>(url)
+  JSON.<span class="fn">parse</span>(response.body)
+<span class="kw">end</span>
+
+result = <span class="fn">ask_cosmotalker</span>(<span class="str">"mars"</span>)
+puts result[<span class="str">'answer'</span>]</code></pre>
+      </div>
+    </section>
+
+    <!-- GO -->
+    <section class="section" id="go">
+      <div class="section-header">
+        <span class="section-num">10</span>
+        <span class="section-title">GO</span>
+        <span class="section-line"></span>
+      </div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang"><span class="lang-dot" style="background:#00ADD8;width:8px;height:8px;border-radius:50%;display:inline-block"></span> net/http</span>
+          <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><code><span class="kw">package</span> main
+
+<span class="kw">import</span> (
+    <span class="str">"encoding/json"</span>
+    <span class="str">"fmt"</span>
+    <span class="str">"io"</span>
+    <span class="str">"net/http"</span>
+    <span class="str">"net/url"</span>
+)
+
+<span class="kw">type</span> <span class="fn">Response</span> <span class="kw">struct</span> {
+    Success <span class="kw">bool</span>   <span class="str">`json:"success"`</span>
+    Answer  <span class="kw">string</span> <span class="str">`json:"answer"`</span>
+}
+
+<span class="kw">func</span> <span class="fn">askCosmoTalker</span>(question <span class="kw">string</span>) (*Response, error) {
+    params := url.<span class="fn">Values</span>{}
+    params.<span class="fn">Add</span>(<span class="str">"q"</span>, question)
+    fullURL := <span class="fn">fmt.Sprintf</span>(<span class="str">"%s?%s"</span>,
+        <span class="str">"https://bhuvanesh-m-dev.github.io/cosmotalker/api/get"</span>,
+        params.<span class="fn">Encode</span>())
+
+    resp, _ := http.<span class="fn">Get</span>(fullURL)
+    <span class="kw">defer</span> resp.Body.<span class="fn">Close</span>()
+
+    body, _ := io.<span class="fn">ReadAll</span>(resp.Body)
+    <span class="kw">var</span> result Response
+    json.<span class="fn">Unmarshal</span>(body, &result)
+    <span class="kw">return</span> &result, <span class="kw">nil</span>
+}</code></pre>
+      </div>
+    </section>
+
+    <!-- BASH -->
+    <section class="section" id="bash">
+      <div class="section-header">
+        <span class="section-num">11</span>
+        <span class="section-title">BASH / cURL</span>
+        <span class="section-line"></span>
+      </div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang"><span class="lang-dot" style="background:#89e051;width:8px;height:8px;border-radius:50%;display:inline-block"></span> Shell script</span>
+          <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><code><span class="cm">#!/bin/bash</span>
+
+<span class="cm"># Simple request</span>
+<span class="fn">curl</span> <span class="str">"https://bhuvanesh-m-dev.github.io/cosmotalker/api/get?q=mars"</span>
+
+<span class="cm"># Parse answer field with jq</span>
+<span class="fn">curl</span> -s <span class="str">"https://bhuvanesh-m-dev.github.io/cosmotalker/api/get?q=earth"</span> | <span class="fn">jq</span> -r <span class="str">'.answer'</span>
+
+<span class="cm"># Reusable function</span>
+<span class="fn">ask_cosmotalker</span>() {
+    <span class="fn">curl</span> -s <span class="str">"https://bhuvanesh-m-dev.github.io/cosmotalker/api/get?q=<span class="kw">$(</span><span class="fn">python3</span> -c <span class="str">'import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))'</span> <span class="str">"$1"</span><span class="kw">)</span>"</span> | <span class="fn">jq</span> -r <span class="str">'.answer'</span>
+}
+
+<span class="fn">ask_cosmotalker</span> <span class="str">"black hole"</span>
+<span class="fn">ask_cosmotalker</span> <span class="str">"iss location"</span></code></pre>
+      </div>
+    </section>
+
+    <!-- QUICK REF -->
+    <section class="section" id="quickref">
+      <div class="section-header">
+        <span class="section-num">12</span>
+        <span class="section-title">QUICK REFERENCE</span>
+        <span class="section-line"></span>
+      </div>
+      <div class="quick-ref">
+        <div class="quick-card">
+          <div class="quick-lang"><span class="lang-dot" style="background:#89e051;width:8px;height:8px;border-radius:50%;display:inline-block"></span>cURL</div>
+          <div class="quick-code">curl ".../api/get?q=mars"</div>
+        </div>
+        <div class="quick-card">
+          <div class="quick-lang"><span class="lang-dot" style="background:#3572A5;width:8px;height:8px;border-radius:50%;display:inline-block"></span>Python</div>
+          <div class="quick-code">requests.get(".../api/get", params={"q":"mars"}).json()</div>
+        </div>
+        <div class="quick-card">
+          <div class="quick-lang"><span class="lang-dot" style="background:#f7df1e;width:8px;height:8px;border-radius:50%;display:inline-block"></span>JavaScript</div>
+          <div class="quick-code">fetch(".../api/get?q=mars").then(r=>r.json())</div>
+        </div>
+        <div class="quick-card">
+          <div class="quick-lang"><span class="lang-dot" style="background:#777bb4;width:8px;height:8px;border-radius:50%;display:inline-block"></span>PHP</div>
+          <div class="quick-code">file_get_contents(".../api/get?q=".urlencode("mars"))</div>
+        </div>
+        <div class="quick-card">
+          <div class="quick-lang"><span class="lang-dot" style="background:#701516;width:8px;height:8px;border-radius:50%;display:inline-block"></span>Ruby</div>
+          <div class="quick-code">Net::HTTP.get(URI(".../api/get?q=mars"))</div>
+        </div>
+        <div class="quick-card">
+          <div class="quick-lang"><span class="lang-dot" style="background:#00ADD8;width:8px;height:8px;border-radius:50%;display:inline-block"></span>Go</div>
+          <div class="quick-code">http.Get(".../api/get?q=mars")</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  // Live try it
+  async function runQuery() {
+    const q = document.getElementById('queryInput').value.trim();
+    if (!q) return;
+
+    const btn = document.getElementById('tryBtn');
+    const output = document.getElementById('tryOutput');
+    const result = document.getElementById('tryResult');
+
+    btn.disabled = true;
+    btn.textContent = '...';
+    output.classList.add('visible');
+    result.innerHTML = '<span style="color:var(--text-dim)">Contacting the cosmos...</span>';
+
+    try {
+      const res = await fetch(
+        `https://bhuvanesh-m-dev.github.io/cosmotalker/api/get?q=${encodeURIComponent(q)}`
+      );
+      const data = await res.json();
+
+      if (data.success) {
+        result.innerHTML = `<div class="response-text">${data.answer.replace(/\n/g, '<br>')}</div>
+          <div style="margin-top:12px;font-size:10px;color:var(--text-dim);letter-spacing:2px">
+            ⏱ ${data.execution_time}s &nbsp;·&nbsp; ${new Date(data.timestamp).toLocaleTimeString()}
+          </div>`;
+      } else {
+        result.innerHTML = `<span class="error-text">⚠ ${data.error || 'No result found'}</span>`;
+      }
+    } catch (e) {
+      result.innerHTML = `<span class="error-text">⚠ ${e.message}</span>`;
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'LAUNCH';
+  }
+
+  document.getElementById('queryInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') runQuery();
+  });
+
+  // Copy buttons
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    const text = pre.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'COPIED!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'COPY';
+        btn.classList.remove('copied');
+      }, 1800);
+    });
+  }
+
+  // Active sidebar link on scroll
+  const sections = document.querySelectorAll('.section, .hero');
+  const sidebarLinks = document.querySelectorAll('.sidebar a');
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        sidebarLinks.forEach(a => {
+          a.classList.toggle('active', a.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { threshold: 0.3 });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
