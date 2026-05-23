@@ -37,17 +37,50 @@
                     indexURL: "https://cdn.jsdelivr.net/pyodide/v0.29.3/full/"
                 });
                 
-                // Load micropip and install cosmotalker
+                // Load required packages
                 await pyodide.loadPackage("micropip");
                 const micropip = pyodide.pyimport("micropip");
-                await micropip.install("cosmotalker");
                 
-                // Run cosmotalker.get()
+                // Install all dependencies that cosmotalker needs
+                await micropip.install("requests");
+                await micropip.install("pytz");
+                await micropip.install("cosmotalker==2.62");
+                
+                // Mock tkinter and other GUI modules
+                await pyodide.runPythonAsync(`
+import sys
+import types
+
+# Mock GUI modules that cause errors in browser
+sys.modules['tkinter'] = types.ModuleType('tkinter')
+sys.modules['tkinter.messagebox'] = types.ModuleType('tkinter.messagebox')
+sys.modules['tkinter.ttk'] = types.ModuleType('tkinter.ttk')
+sys.modules['customtkinter'] = types.ModuleType('customtkinter')
+                `);
+                
+                // Run cosmotalker.get() and return JSON
                 const result = await pyodide.runPythonAsync(`
 import json
 import cosmotalker as ct
-result = ct.get(${JSON.stringify(query)})
-json.dumps({"status": "success", "data": result, "query": ${JSON.stringify(query)}})
+
+# Use only .get() function
+try:
+    data = ct.get(${JSON.stringify(query)})
+    result = {
+        "status": "success",
+        "data": data,
+        "query": ${JSON.stringify(query)},
+        "version": "2.62"
+    }
+except Exception as e:
+    result = {
+        "status": "error",
+        "message": str(e),
+        "query": ${JSON.stringify(query)},
+        "version": "2.62"
+    }
+
+json.dumps(result)
                 `);
                 
                 outputJSON(JSON.parse(result));
@@ -56,7 +89,8 @@ json.dumps({"status": "success", "data": result, "query": ${JSON.stringify(query
                 outputJSON({
                     status: 'error',
                     message: error.message,
-                    query: query
+                    query: query,
+                    version: "2.62"
                 });
             }
         })();
