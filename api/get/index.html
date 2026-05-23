@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>CosmoTalker API</title>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.29.3/full/pyodide.js"></script>
+    <script>
+        (async function() {
+            // Get query from URL parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const query = urlParams.get('q');
+            
+            // Function to output JSON
+            function outputJSON(data) {
+                document.body.innerHTML = '';
+                document.body.style.margin = '0';
+                document.body.style.padding = '20px';
+                document.body.style.backgroundColor = '#0a0e27';
+                document.body.style.fontFamily = 'monospace';
+                document.body.style.color = '#e0e0e0';
+                document.body.textContent = JSON.stringify(data, null, 2);
+            }
+            
+            // Check if query exists
+            if (!query) {
+                outputJSON({
+                    status: 'error',
+                    message: 'Missing "q" parameter. Use: ?q=planet_name',
+                    example: '/api/get/?q=mars'
+                });
+                return;
+            }
+            
+            try {
+                // Initialize Pyodide
+                let pyodide = await loadPyodide({
+                    indexURL: "https://cdn.jsdelivr.net/pyodide/v0.29.3/full/"
+                });
+                
+                // Load micropip and install cosmotalker
+                await pyodide.loadPackage("micropip");
+                const micropip = pyodide.pyimport("micropip");
+                await micropip.install("cosmotalker");
+                
+                // Run cosmotalker.get()
+                const result = await pyodide.runPythonAsync(`
+import json
+import cosmotalker as ct
+result = ct.get(${JSON.stringify(query)})
+json.dumps({"status": "success", "data": result, "query": ${JSON.stringify(query)}})
+                `);
+                
+                outputJSON(JSON.parse(result));
+                
+            } catch (error) {
+                outputJSON({
+                    status: 'error',
+                    message: error.message,
+                    query: query
+                });
+            }
+        })();
+    </script>
+</head>
+<body></body>
+</html>
