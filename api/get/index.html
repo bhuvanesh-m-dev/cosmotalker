@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Q&A - Ask CosmoTalker</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.29.3/full/pyodide.js"></script>
+</head>
+<body>
+    <div class="cosmic-container">
+        <div class="nebula-bg"></div>
+        
+        <header>
+            <h1>🌌 Space Q&A</h1>
+            <p>Ask anything about space - powered by CosmoTalker</p>
+        </header>
+
+        <div class="query-section">
+            <div class="input-group">
+                <label>🔭 Your Question</label>
+                <input type="text" id="questionInput" 
+                       placeholder="Example: planet earth | mars facts | what is a black hole | iss location"
+                       onkeypress="handleEnter(event)">
+                <button onclick="askQuestion()" id="askBtn">
+                    <span>🚀 Ask CosmoTalker</span>
+                </button>
+            </div>
+
+            <div class="example-questions">
+                <span>Quick questions:</span>
+                <button onclick="setQuestion('planet earth')">🌍 Planet Earth</button>
+                <button onclick="setQuestion('mars facts')">🔴 Mars Facts</button>
+                <button onclick="setQuestion('black hole')">⚫ Black Hole</button>
+                <button onclick="setQuestion('iss location')">🛰️ ISS Location</button>
+                <button onclick="setQuestion('neptune')">🔵 Neptune</button>
+                <button onclick="setQuestion('fun fact')">✨ Random Fact</button>
+            </div>
+        </div>
+
+        <div class="answer-container" id="answerContainer" style="display: none;">
+            <div class="answer-header">
+                <h2>📡 Answer from CosmoTalker</h2>
+                <button onclick="clearAnswer()" class="clear-btn">✖ Clear</button>
+            </div>
+            <div class="answer-content" id="answerContent">
+                <div class="loading-spinner"></div>
+                <div id="answerText"></div>
+            </div>
+            <div class="share-section">
+                <button onclick="shareAnswer()" class="share-btn">🔗 Share this Answer</button>
+                <span id="shareFeedback" class="share-feedback"></span>
+            </div>
+        </div>
+
+        <footer>
+            <p>Powered by <strong>CosmoTalker</strong> | Real space data | Zero installation</p>
+            <p class="small">Use URL: <code>?q=your question</code> to get answers directly</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
