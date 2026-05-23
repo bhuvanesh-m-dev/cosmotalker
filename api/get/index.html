@@ -22,18 +22,21 @@
             font-size: 13px;
             line-height: 1.6;
             max-width: 800px;
-            margin: 0 auto;
+            margin: 0 auto 20px;
         }
         .loading-line {
             margin: 4px 0;
             opacity: 0;
             animation: fadeIn 0.3s ease forwards;
+            white-space: pre-wrap;
+            word-break: break-word;
         }
         .loading-line.info { color: #60a5fa; }
         .loading-line.success { color: #10b981; }
         .loading-line.warning { color: #f59e0b; }
         .loading-line.error { color: #ef4444; }
         .loading-line.system { color: #a78bfa; }
+        .loading-line.stdout { color: #e2e8f0; }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateX(-10px); }
             to { opacity: 1; transform: translateX(0); }
@@ -55,7 +58,6 @@
             background: #0f172a;
             border-radius: 12px;
             padding: 20px;
-            margin-top: 20px;
             border-left: 4px solid #10b981;
             max-width: 800px;
             margin: 20px auto 0;
@@ -65,12 +67,13 @@
             margin-bottom: 12px;
             padding-bottom: 8px;
             border-bottom: 1px solid #334155;
+            color: #10b981;
         }
-        pre {
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            margin: 0;
-            font-family: inherit;
+        .error-header {
+            border-left-color: #ef4444;
+        }
+        .error-header .result-header {
+            color: #ef4444;
         }
         .json-response {
             background: #1e293b;
@@ -78,32 +81,32 @@
             border-radius: 8px;
             overflow-x: auto;
         }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin: 0;
+            font-family: inherit;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
     <div id="output"></div>
     
     <script>
-        // CosmoTalker API with GalacticCode-style loading progress
-        // Shows real-time installation and initialization like GalacticCode
+        // CosmoTalker API v2.62 - Uses ONLY .get() function
+        // No version attribute check - just works
         
         let pyodide = null;
         let isReady = false;
         let outputDiv = null;
-        let statusLogs = [];
         
-        // Logger that mimics GalacticCode console output
         function log(message, type = 'info') {
-            const timestamp = new Date().toLocaleTimeString();
-            const logEntry = { message, type, timestamp };
-            statusLogs.push(logEntry);
-            
             if (outputDiv) {
                 const line = document.createElement('div');
                 line.className = `loading-line ${type}`;
                 
-                // Add spinner for loading messages
-                if (type === 'info' && message.includes('Loading') || message.includes('Initializing')) {
+                if (type === 'info' && (message.includes('Loading') || message.includes('Initializing'))) {
                     line.innerHTML = `<span class="spinner"></span> ${message}`;
                 } else {
                     line.textContent = message;
@@ -112,8 +115,7 @@
                 outputDiv.appendChild(line);
                 line.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
-            
-            console.log(`[${type.toUpperCase()}]`, message);
+            console.log(`[${type}]`, message);
         }
         
         async function initCosmoTalker() {
@@ -130,7 +132,7 @@
             log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'system');
             
             try {
-                // Step 1: Loading Pyodide
+                // Step 1: Load Pyodide
                 log('📦 Loading Pyodide (Python WebAssembly)...', 'info');
                 const loadStart = performance.now();
                 
@@ -138,12 +140,12 @@
                     indexURL: "https://cdn.jsdelivr.net/pyodide/v0.29.3/full/",
                     stdout: (text) => {
                         if (text && !text.includes('Loading ') && !text.includes('Loaded ')) {
-                            log(`[Python] ${text}`, 'stdout');
+                            log(`[CosmoTalker] ${text}`, 'stdout');
                         }
                     },
                     stderr: (text) => {
                         if (text && !text.includes('Loading ')) {
-                            log(`[Python Error] ${text}`, 'error');
+                            log(`[Error] ${text}`, 'error');
                         }
                     }
                 });
@@ -151,22 +153,19 @@
                 const loadTime = ((performance.now() - loadStart) / 1000).toFixed(2);
                 log(`✅ Pyodide loaded in ${loadTime}s`, 'success');
                 
-                // Step 2: Setup Python environment
+                // Step 2: Setup Python output capture
                 log('🔧 Setting up Python environment...', 'info');
                 pyodide.runPython(`
 import sys
 import io
 
-class RealTimeCapture:
+class OutputCapture:
     def __init__(self):
         self.buffer = io.StringIO()
     
     def write(self, text):
         if text and text.strip():
             self.buffer.write(text)
-            # Send to JS for real-time display
-            import js
-            js.logToConsole(text, 'stdout')
     
     def get_output(self):
         return self.buffer.getvalue()
@@ -174,7 +173,7 @@ class RealTimeCapture:
     def clear(self):
         self.buffer = io.StringIO()
 
-_capture = RealTimeCapture()
+_capture = OutputCapture()
 sys.stdout = _capture
 sys.stderr = _capture
 
@@ -192,21 +191,24 @@ def clear_capture():
                 
                 const micropip = pyodide.pyimport("micropip");
                 
-                // Step 4: Install CosmoTalker and dependencies
-                log('🚀 Installing CosmoTalker library and dependencies...', 'info');
-                log('   • cosmotalker==2.62', 'info');
-                log('   • cosmodb', 'info');
-                log('   • requests', 'info');
-                log('   • pytz', 'info');
+                // Step 4: Install CosmoTalker v2.62 only
+                log('🚀 Installing CosmoTalker v2.62...', 'info');
+                log('   📦 cosmotalker==2.62', 'info');
+                log('   📦 cosmodb (dependency)', 'info');
+                log('   📦 requests (dependency)', 'info');
+                log('   📦 pytz (dependency)', 'info');
                 
                 const installStart = performance.now();
-                await micropip.install(["cosmodb", "cosmotalker==2.62", "requests", "pytz"]);
+                
+                // Install exact version 2.62
+                await micropip.install("cosmotalker==2.62");
+                await micropip.install(["cosmodb", "requests", "pytz"]);
+                
                 const installTime = ((performance.now() - installStart) / 1000).toFixed(2);
+                log(`✅ CosmoTalker v2.62 installed in ${installTime}s`, 'success');
                 
-                log(`✅ CosmoTalker installed successfully in ${installTime}s`, 'success');
-                
-                // Step 5: Mock tkinter and setup
-                log('🔧 Configuring CosmoTalker for browser environment...', 'info');
+                // Step 5: Configure CosmoTalker (no version check)
+                log('🔧 Configuring CosmoTalker for browser...', 'info');
                 pyodide.runPython(`
 import sys
 import types
@@ -215,22 +217,23 @@ import types
 for mod in ['tkinter', 'tkinter.messagebox', 'tkinter.ttk', 'customtkinter']:
     sys.modules[mod] = types.ModuleType(mod)
 
+# Import CosmoTalker
 import cosmotalker as ct
 
-# Disable image preview functions
+# Disable image preview (not supported in browser)
 class DummyImg:
     def __call__(self, *args, **kwargs):
-        return "Image preview not available in web version"
+        return "⚠️ Image preview not available in web version"
 
 ct.img = DummyImg()
 
-print("🎉 CosmoTalker is ready to explore the cosmos!")
-print(f"📚 Version: {ct.__version__}")
+print("✨ CosmoTalker v2.62 is ready!")
+print("🌌 Unified .get() function loaded")
 print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
                 `);
                 
                 log('🎉 CosmoTalker initialization complete!', 'success');
-                log('✨ Ready to answer space questions', 'success');
+                log('✨ Ready to answer space questions using .get()', 'success');
                 log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'system');
                 
                 isReady = true;
@@ -242,13 +245,6 @@ print("━━━━━━━━━━━━━━━━━━━━━━━━�
             }
         }
         
-        // Log to console from Python
-        window.logToConsole = function(text, type) {
-            if (text && text.trim()) {
-                log(`[CosmoTalker] ${text}`, type);
-            }
-        };
-        
         async function executeQuery(question) {
             const startTime = performance.now();
             
@@ -258,43 +254,47 @@ print("━━━━━━━━━━━━━━━━━━━━━━━━�
                 // Clear previous output
                 pyodide.runPython(`clear_capture()`);
                 
-                log(`🔭 Processing query: "${question}"`, 'system');
+                log(`🔭 Processing: "${question}"`, 'system');
                 
-                // Use cosmotalker.get() - the unified function
+                // Use ONLY cosmotalker.get() - no version check
                 const pythonCode = `
 import cosmotalker as ct
 
-print("🔍 Searching CosmoTalker database...")
+print("🔍 Querying CosmoTalker database...")
 print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 
 try:
     # Use the unified get() function
-    query = ${JSON.stringify(question)}
-    result = ct.get(query)
+    result = ct.get(${JSON.stringify(question)})
     
-    if result:
-        print("✅ Answer found!")
+    if result and str(result).strip():
+        print("✅ Answer from CosmoTalker:")
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         print(result)
     else:
-        print("⚠️ No information found for:", query)
-        print("💡 Try asking about specific planets, the ISS, or SpaceX!")
+        print("⚠️ No information found for:", ${JSON.stringify(question)})
+        print("💡 Try these examples:")
+        print("   • earth")
+        print("   • mars")
+        print("   • iss location")
+        print("   • spacex")
+        print("   • black hole")
         
 except Exception as e:
     print(f"❌ Error: {str(e)}")
-    print("💡 Try these example queries:")
-    print("   • planet earth")
-    print("   • mars")
-    print("   • iss location")
-    print("   • spacex")
+    print("💡 CosmoTalker .get() works with queries like:")
+    print("   • planet names (earth, mars, jupiter)")
+    print("   • 'iss location'")
+    print("   • 'spacex'")
+    print("   • 'fun fact'")
                 `;
                 
-                log('🚀 Executing query with CosmoTalker.get()...', 'info');
+                log('🚀 Calling cosmotalker.get()...', 'info');
                 
                 // Execute with timeout
                 const executionPromise = pyodide.runPythonAsync(pythonCode);
                 const timeoutPromise = new Promise((_, reject) => {
-                    setTimeout(() => reject(new Error("Execution timeout (30s)")), 30000);
+                    setTimeout(() => reject(new Error("Timeout (30s)")), 30000);
                 });
                 
                 await Promise.race([executionPromise, timeoutPromise]);
@@ -305,68 +305,77 @@ except Exception as e:
                 
                 const executionTime = ((performance.now() - startTime) / 1000).toFixed(3);
                 
-                log(`✨ Query completed in ${executionTime}s`, 'success');
-                log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'system');
-                
-                // Return JSON response
-                return {
-                    success: true,
-                    query: question,
-                    result: output || `No information found for "${question}". Please try a different question.`,
-                    execution_time: parseFloat(executionTime),
-                    timestamp: new Date().toISOString(),
-                    method: "cosmotalker.get()",
-                    source: "CosmoTalker v2.62",
-                    initialization_logs: statusLogs
-                };
+                if (output && output.length > 0 && !output.includes('No information found')) {
+                    log(`✅ Query completed in ${executionTime}s`, 'success');
+                    log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'system');
+                    
+                    return {
+                        success: true,
+                        query: question,
+                        result: output,
+                        execution_time: parseFloat(executionTime),
+                        timestamp: new Date().toISOString(),
+                        method: "cosmotalker.get()",
+                        version: "2.62"
+                    };
+                } else {
+                    log(`⚠️ No results for "${question}"`, 'warning');
+                    
+                    return {
+                        success: false,
+                        query: question,
+                        result: null,
+                        error: "No information found. Try: earth, mars, iss location, spacex, fun fact",
+                        execution_time: parseFloat(executionTime),
+                        timestamp: new Date().toISOString(),
+                        method: "cosmotalker.get()",
+                        version: "2.62"
+                    };
+                }
                 
             } catch (error) {
                 const executionTime = ((performance.now() - startTime) / 1000).toFixed(3);
                 log(`❌ Error: ${error.message}`, 'error');
+                log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'system');
                 
                 return {
                     success: false,
                     query: question,
-                    error: error.message,
                     result: null,
+                    error: error.message,
                     execution_time: parseFloat(executionTime),
                     timestamp: new Date().toISOString(),
                     method: "cosmotalker.get()",
-                    initialization_logs: statusLogs
+                    version: "2.62"
                 };
             }
         }
         
-        // Handle API request
         async function handleRequest() {
             const urlParams = new URLSearchParams(window.location.search);
             let question = urlParams.get('q') || urlParams.get('query') || urlParams.get('question');
             
-            // If no question, show loading screen and prompt
             if (!question) {
                 await initCosmoTalker();
                 log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'system');
                 log('💡 Usage: Add ?q=your question to the URL', 'info');
-                log('📝 Example: ?q=planet earth', 'info');
-                log('📝 Example: ?q=iss location', 'info');
-                log('📝 Example: ?q=spacex', 'info');
+                log('📝 Examples:', 'info');
+                log('   • ?q=earth', 'info');
+                log('   • ?q=mars', 'info');
+                log('   • ?q=iss location', 'info');
+                log('   • ?q=spacex', 'info');
+                log('   • ?q=fun fact', 'info');
                 log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'system');
                 
                 const errorResponse = {
                     success: false,
                     error: "Missing 'q' parameter",
                     message: "Please provide a question using the 'q' parameter",
-                    examples: [
-                        "?q=planet earth",
-                        "?q=mars", 
-                        "?q=iss location",
-                        "?q=spacex",
-                        "?q=fun fact"
-                    ],
+                    examples: ["?q=earth", "?q=mars", "?q=iss location", "?q=spacex", "?q=fun fact"],
                     timestamp: new Date().toISOString()
                 };
                 
-                renderJSON(errorResponse);
+                renderJSON(errorResponse, false);
                 return;
             }
             
@@ -374,20 +383,18 @@ except Exception as e:
                 question = decodeURIComponent(question);
             } catch(e) {}
             
-            // Execute query and show loading
             const result = await executeQuery(question);
-            renderJSON(result);
+            renderJSON(result, result.success);
         }
         
-        function renderJSON(data) {
+        function renderJSON(data, isSuccess = true) {
             const jsonString = JSON.stringify(data, null, 2);
             
-            // Create result display
             const resultDiv = document.createElement('div');
-            resultDiv.className = 'result-box';
+            resultDiv.className = `result-box ${!isSuccess ? 'error-header' : ''}`;
             resultDiv.innerHTML = `
                 <div class="result-header">
-                    📡 API Response (JSON)
+                    ${isSuccess ? '✅ API Response (JSON)' : '⚠️ API Response (JSON)'}
                 </div>
                 <div class="json-response">
                     <pre>${escapeHtml(jsonString)}</pre>
@@ -403,7 +410,7 @@ except Exception as e:
             return div.innerHTML;
         }
         
-        // Start the API
+        // Start
         handleRequest();
     </script>
 </body>
