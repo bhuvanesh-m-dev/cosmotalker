@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CosmoTalker Q&A - Space Information API</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="space-bg"></div>
+    
+    <div class="container">
+        <header>
+            <div class="logo">
+                <span class="logo-icon">🌌</span>
+                <h1>CosmoTalker Q&A</h1>
+            </div>
+            <p>Ask anything about space - powered by <strong>cosmotalker.get()</strong></p>
+        </header>
+
+        <div class="query-box">
+            <div class="input-wrapper">
+                <label>🔭 Your Question</label>
+                <div class="input-group">
+                    <input type="text" id="questionInput" 
+                           placeholder="e.g., Tell me about Mars, Where is ISS?, What is a black hole?"
+                           autocomplete="off">
+                    <button id="askBtn">
+                        <span>🚀 Ask CosmoTalker</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="quick-questions">
+                <span>Quick examples:</span>
+                <div class="chips">
+                    <button class="chip" data-q="planet earth">🌍 Earth</button>
+                    <button class="chip" data-q="mars">🔴 Mars</button>
+                    <button class="chip" data-q="jupiter">🪐 Jupiter</button>
+                    <button class="chip" data-q="iss location">🛰️ ISS</button>
+                    <button class="chip" data-q="black hole">⚫ Black Hole</button>
+                    <button class="chip" data-q="fun fact">✨ Random Fact</button>
+                    <button class="chip" data-q="spacex">🚀 SpaceX</button>
+                    <button class="chip" data-q="milky way">⭐ Milky Way</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="answerSection" class="answer-section" style="display: none;">
+            <div class="answer-header">
+                <div>
+                    <span class="answer-icon">📡</span>
+                    <h3>CosmoTalker Response</h3>
+                </div>
+                <button id="clearBtn" class="clear-btn">✖ Clear</button>
+            </div>
+            <div class="answer-content">
+                <div id="answerText" class="answer-text"></div>
+                <div id="loadingIndicator" class="loading" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>Consulting CosmoTalker...</p>
+                </div>
+            </div>
+            <div class="answer-footer">
+                <div class="meta">
+                    <span id="timestamp"></span>
+                    <span id="execTime"></span>
+                </div>
+                <button id="shareBtn" class="share-btn">🔗 Share Answer</button>
+            </div>
+        </div>
+
+        <footer>
+            <p>💡 <strong>API Endpoint:</strong> <code>https://bhuvanesh-m-dev.github.io/cosmotalker/api/get?q=your question</code></p>
+            <p>Returns pure JSON - perfect for external applications</p>
+        </footer>
+    </div>
+
+    <div id="toast" class="toast"></div>
+    <script src="script.js"></script>
+</body>
+</html>

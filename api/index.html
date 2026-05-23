@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CosmoTalker API - Unified .get() Endpoint</title>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.29.3/full/pyodide.js"></script>
+</head>
+<body>
+    <script>
+        // CosmoTalker API - Uses ONLY cosmotalker.get()
+        // Usage: ?q=your question
+        // Returns: JSON only
+        
+        let pyodide = null;
+        let isReady = false;
+        let initPromise = null;
+        
+        // Initialize Pyodide with CosmoTalker
+        async function initCosmoTalker() {
+            if (isReady && pyodide) return pyodide;
+            if (initPromise) return initPromise;
+            
+            initPromise = (async () => {
+                try {
+                    // Load Pyodide
+                    pyodide = await loadPyodide({
+                        indexURL: "https://cdn.jsdelivr.net/pyodide/v0.29.3/full/",
+                        stdout: () => {},
+                        stderr: () => {}
+                    });
+                    
+                    // Setup output capture
+                    pyodide.runPython(`
+import sys
+import io
+
+class Capture:
+    def __init__(self):
+        self.buffer = io.StringIO()
+    def write(self, text):
+        if text and text.strip():
+            self.buffer.write(text)
+    def get(self):
+        return self.buffer.getvalue()
+    def clear(self):
+        self.buffer = io.StringIO()
+
+_capture = Capture()
+sys.stdout = _capture
+sys.stderr = _capture
+
+def get_output():
+    return _capture.get()
+
+def clear_output():
+    _capture.clear()
+                    `);
+                    
+                    // Install CosmoTalker
+                    await pyodide.loadPackage("micropip");
+                    const micropip = pyodide.pyimport("micropip");
+                    
+                    await micropip.install(["cosmodb", "cosmotalker==2.62", "requests", "pytz"]);
+                    
+                    // Mock tkinter and setup
+                    pyodide.runPython(`
+import sys
+import types
+
+# Mock tkinter for browser
+for mod in ['tkinter', 'tkinter.messagebox', 'tkinter.ttk', 'customtkinter']:
+    sys.modules[mod] = types.ModuleType(mod)
+
+import cosmotalker as ct
+
+# Disable image functions
+class DummyImg:
+    def __call__(self, *args, **kwargs):
+        return ""
+
+ct.img = DummyImg()
+
+# CosmoTalker is ready with unified .get() function
+READY = True
+                    `);
+                    
+                    isReady = true;
+                    return pyodide;
+                } catch (error) {
+                    console.error("Init failed:", error);
+                    throw error;
+                }
+            })();
+            
+            return initPromise;
+        }
+        
+        // Execute query using cosmotalker.get()
+        async function executeQuery(question) {
+            const startTime = performance.now();
+            
+            try {
+                await initCosmoTalker();
+                
+                // Clear previous output
+                pyodide.runPython(`clear_output()`);
+                
+                // Use ONLY cosmotalker.get() - unified function
+                const pythonCode = `
+import cosmotalker as ct
+
+# Use the unified get() function
+query = ${JSON.stringify(question)}
+result = ct.get(query)
+
+# Print the result
+if result:
+    print(result)
+else:
+    print(f"No information found for: ${JSON.stringify(question)}")
+                `;
+                
+                await pyodide.runPythonAsync(pythonCode);
+                
+                let output = pyodide.runPython(`get_output()`);
+                output = output.trim();
+                
+                const executionTime = ((performance.now() - startTime) / 1000).toFixed(3);
+                
+                return {
+                    success: true,
+                    query: question,
+                    result: output || "No data returned",
+                    execution_time: parseFloat(executionTime),
+                    timestamp: new Date().toISOString(),
+                    method: "cosmotalker.get()",
+                    source: "CosmoTalker v2.62"
+                };
+                
+            } catch (error) {
+                const executionTime = ((performance.now() - startTime) / 1000).toFixed(3);
+                return {
+                    success: false,
+                    query: question,
+                    error: error.message,
+                    execution_time: parseFloat(executionTime),
+                    timestamp: new Date().toISOString(),
+                    method: "cosmotalker.get()"
+                };
+            }
+        }
+        
+        // Handle API request
+        async function handleRequest() {
+            const urlParams = new URLSearchParams(window.location.search);
+            let question = urlParams.get('q') || urlParams.get('query') || urlParams.get('question');
+            
+            if (!question) {
+                const errorResponse = {
+                    success: false,
+                    error: "Missing 'q' parameter",
+                    usage: "?q=your space question",
+                    examples: [
+                        "?q=planet earth",
+                        "?q=mars",
+                        "?q=iss location",
+                        "?q=black hole",
+                        "?q=fun fact"
+                    ],
+                    timestamp: new Date().toISOString()
+                };
+                renderJSON(errorResponse);
+                return;
+            }
+            
+            try {
+                question = decodeURIComponent(question);
+            } catch(e) {}
+            
+            const result = await executeQuery(question);
+            renderJSON(result);
+        }
+        
+        function renderJSON(data) {
+            const jsonString = JSON.stringify(data, null, 2);
+            document.body.innerHTML = jsonString;
+            document.body.style.whiteSpace = "pre-wrap";
+            document.body.style.fontFamily = "monospace";
+            document.body.style.background = "#0a0e1a";
+            document.body.style.color = "#e2e8f0";
+            document.body.style.padding = "20px";
+            document.body.style.margin = "0";
+            document.body.style.fontSize = "14px";
+            document.body.style.lineHeight = "1.6";
+            
+            // JSONP support
+            const callback = new URLSearchParams(location.search).get('callback');
+            if (callback && /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(callback)) {
+                document.body.innerHTML = `${callback}(${jsonString});`;
+            }
+        }
+        
+        // Start
+        handleRequest();
+    </script>
+</body>
+</html>
