@@ -4,98 +4,251 @@
     <meta charset="UTF-8">
     <title>CosmoTalker API - Unified .get() Endpoint</title>
     <script src="https://cdn.jsdelivr.net/pyodide/v0.29.3/full/pyodide.js"></script>
+    <style>
+        body {
+            background: #0a0e1a;
+            color: #e2e8f0;
+            font-family: 'JetBrains Mono', monospace;
+            padding: 20px;
+            margin: 0;
+            min-height: 100vh;
+        }
+        .loading-console {
+            background: #0f172a;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #334155;
+            font-family: monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .loading-line {
+            margin: 4px 0;
+            opacity: 0;
+            animation: fadeIn 0.3s ease forwards;
+        }
+        .loading-line.info { color: #60a5fa; }
+        .loading-line.success { color: #10b981; }
+        .loading-line.warning { color: #f59e0b; }
+        .loading-line.error { color: #ef4444; }
+        .loading-line.system { color: #a78bfa; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .spinner {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid #667eea;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .result-box {
+            background: #0f172a;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 4px solid #10b981;
+            max-width: 800px;
+            margin: 20px auto 0;
+        }
+        .result-header {
+            font-weight: bold;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #334155;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin: 0;
+            font-family: inherit;
+        }
+        .json-response {
+            background: #1e293b;
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+    </style>
 </head>
 <body>
+    <div id="output"></div>
+    
     <script>
-        // CosmoTalker API - Uses ONLY cosmotalker.get()
-        // Usage: ?q=your question
-        // Returns: JSON only
+        // CosmoTalker API with GalacticCode-style loading progress
+        // Shows real-time installation and initialization like GalacticCode
         
         let pyodide = null;
         let isReady = false;
-        let initPromise = null;
+        let outputDiv = null;
+        let statusLogs = [];
         
-        // Initialize Pyodide with CosmoTalker
+        // Logger that mimics GalacticCode console output
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = { message, type, timestamp };
+            statusLogs.push(logEntry);
+            
+            if (outputDiv) {
+                const line = document.createElement('div');
+                line.className = `loading-line ${type}`;
+                
+                // Add spinner for loading messages
+                if (type === 'info' && message.includes('Loading') || message.includes('Initializing')) {
+                    line.innerHTML = `<span class="spinner"></span> ${message}`;
+                } else {
+                    line.textContent = message;
+                }
+                
+                outputDiv.appendChild(line);
+                line.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+            
+            console.log(`[${type.toUpperCase()}]`, message);
+        }
+        
         async function initCosmoTalker() {
             if (isReady && pyodide) return pyodide;
-            if (initPromise) return initPromise;
             
-            initPromise = (async () => {
-                try {
-                    // Load Pyodide
-                    pyodide = await loadPyodide({
-                        indexURL: "https://cdn.jsdelivr.net/pyodide/v0.29.3/full/",
-                        stdout: () => {},
-                        stderr: () => {}
-                    });
-                    
-                    // Setup output capture
-                    pyodide.runPython(`
+            outputDiv = document.getElementById('output');
+            if (!outputDiv) {
+                outputDiv = document.createElement('div');
+                outputDiv.className = 'loading-console';
+                document.body.appendChild(outputDiv);
+            }
+            
+            log('🌌 Initializing GalacticCode Engine...', 'system');
+            log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'system');
+            
+            try {
+                // Step 1: Loading Pyodide
+                log('📦 Loading Pyodide (Python WebAssembly)...', 'info');
+                const loadStart = performance.now();
+                
+                pyodide = await loadPyodide({
+                    indexURL: "https://cdn.jsdelivr.net/pyodide/v0.29.3/full/",
+                    stdout: (text) => {
+                        if (text && !text.includes('Loading ') && !text.includes('Loaded ')) {
+                            log(`[Python] ${text}`, 'stdout');
+                        }
+                    },
+                    stderr: (text) => {
+                        if (text && !text.includes('Loading ')) {
+                            log(`[Python Error] ${text}`, 'error');
+                        }
+                    }
+                });
+                
+                const loadTime = ((performance.now() - loadStart) / 1000).toFixed(2);
+                log(`✅ Pyodide loaded in ${loadTime}s`, 'success');
+                
+                // Step 2: Setup Python environment
+                log('🔧 Setting up Python environment...', 'info');
+                pyodide.runPython(`
 import sys
 import io
 
-class Capture:
+class RealTimeCapture:
     def __init__(self):
         self.buffer = io.StringIO()
+    
     def write(self, text):
         if text and text.strip():
             self.buffer.write(text)
-    def get(self):
+            # Send to JS for real-time display
+            import js
+            js.logToConsole(text, 'stdout')
+    
+    def get_output(self):
         return self.buffer.getvalue()
+    
     def clear(self):
         self.buffer = io.StringIO()
 
-_capture = Capture()
+_capture = RealTimeCapture()
 sys.stdout = _capture
 sys.stderr = _capture
 
-def get_output():
-    return _capture.get()
+def get_captured():
+    return _capture.get_output()
 
-def clear_output():
+def clear_capture():
     _capture.clear()
-                    `);
-                    
-                    // Install CosmoTalker
-                    await pyodide.loadPackage("micropip");
-                    const micropip = pyodide.pyimport("micropip");
-                    
-                    await micropip.install(["cosmodb", "cosmotalker==2.62", "requests", "pytz"]);
-                    
-                    // Mock tkinter and setup
-                    pyodide.runPython(`
+                `);
+                
+                // Step 3: Install micropip
+                log('📦 Loading micropip package manager...', 'info');
+                await pyodide.loadPackage("micropip");
+                log('✅ micropip ready', 'success');
+                
+                const micropip = pyodide.pyimport("micropip");
+                
+                // Step 4: Install CosmoTalker and dependencies
+                log('🚀 Installing CosmoTalker library and dependencies...', 'info');
+                log('   • cosmotalker==2.62', 'info');
+                log('   • cosmodb', 'info');
+                log('   • requests', 'info');
+                log('   • pytz', 'info');
+                
+                const installStart = performance.now();
+                await micropip.install(["cosmodb", "cosmotalker==2.62", "requests", "pytz"]);
+                const installTime = ((performance.now() - installStart) / 1000).toFixed(2);
+                
+                log(`✅ CosmoTalker installed successfully in ${installTime}s`, 'success');
+                
+                // Step 5: Mock tkinter and setup
+                log('🔧 Configuring CosmoTalker for browser environment...', 'info');
+                pyodide.runPython(`
 import sys
 import types
 
-# Mock tkinter for browser
+# Mock tkinter modules (not available in browser)
 for mod in ['tkinter', 'tkinter.messagebox', 'tkinter.ttk', 'customtkinter']:
     sys.modules[mod] = types.ModuleType(mod)
 
 import cosmotalker as ct
 
-# Disable image functions
+# Disable image preview functions
 class DummyImg:
     def __call__(self, *args, **kwargs):
-        return ""
+        return "Image preview not available in web version"
 
 ct.img = DummyImg()
 
-# CosmoTalker is ready with unified .get() function
-READY = True
-                    `);
-                    
-                    isReady = true;
-                    return pyodide;
-                } catch (error) {
-                    console.error("Init failed:", error);
-                    throw error;
-                }
-            })();
-            
-            return initPromise;
+print("🎉 CosmoTalker is ready to explore the cosmos!")
+print(f"📚 Version: {ct.__version__}")
+print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+                `);
+                
+                log('🎉 CosmoTalker initialization complete!', 'success');
+                log('✨ Ready to answer space questions', 'success');
+                log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'system');
+                
+                isReady = true;
+                return pyodide;
+                
+            } catch (error) {
+                log(`❌ Initialization failed: ${error.message}`, 'error');
+                throw error;
+            }
         }
         
-        // Execute query using cosmotalker.get()
+        // Log to console from Python
+        window.logToConsole = function(text, type) {
+            if (text && text.trim()) {
+                log(`[CosmoTalker] ${text}`, type);
+            }
+        };
+        
         async function executeQuery(question) {
             const startTime = performance.now();
             
@@ -103,49 +256,83 @@ READY = True
                 await initCosmoTalker();
                 
                 // Clear previous output
-                pyodide.runPython(`clear_output()`);
+                pyodide.runPython(`clear_capture()`);
                 
-                // Use ONLY cosmotalker.get() - unified function
+                log(`🔭 Processing query: "${question}"`, 'system');
+                
+                // Use cosmotalker.get() - the unified function
                 const pythonCode = `
 import cosmotalker as ct
 
-# Use the unified get() function
-query = ${JSON.stringify(question)}
-result = ct.get(query)
+print("🔍 Searching CosmoTalker database...")
+print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 
-# Print the result
-if result:
-    print(result)
-else:
-    print(f"No information found for: ${JSON.stringify(question)}")
+try:
+    # Use the unified get() function
+    query = ${JSON.stringify(question)}
+    result = ct.get(query)
+    
+    if result:
+        print("✅ Answer found!")
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        print(result)
+    else:
+        print("⚠️ No information found for:", query)
+        print("💡 Try asking about specific planets, the ISS, or SpaceX!")
+        
+except Exception as e:
+    print(f"❌ Error: {str(e)}")
+    print("💡 Try these example queries:")
+    print("   • planet earth")
+    print("   • mars")
+    print("   • iss location")
+    print("   • spacex")
                 `;
                 
-                await pyodide.runPythonAsync(pythonCode);
+                log('🚀 Executing query with CosmoTalker.get()...', 'info');
                 
-                let output = pyodide.runPython(`get_output()`);
+                // Execute with timeout
+                const executionPromise = pyodide.runPythonAsync(pythonCode);
+                const timeoutPromise = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error("Execution timeout (30s)")), 30000);
+                });
+                
+                await Promise.race([executionPromise, timeoutPromise]);
+                
+                // Get captured output
+                let output = pyodide.runPython(`get_captured()`);
                 output = output.trim();
                 
                 const executionTime = ((performance.now() - startTime) / 1000).toFixed(3);
                 
+                log(`✨ Query completed in ${executionTime}s`, 'success');
+                log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'system');
+                
+                // Return JSON response
                 return {
                     success: true,
                     query: question,
-                    result: output || "No data returned",
+                    result: output || `No information found for "${question}". Please try a different question.`,
                     execution_time: parseFloat(executionTime),
                     timestamp: new Date().toISOString(),
                     method: "cosmotalker.get()",
-                    source: "CosmoTalker v2.62"
+                    source: "CosmoTalker v2.62",
+                    initialization_logs: statusLogs
                 };
                 
             } catch (error) {
                 const executionTime = ((performance.now() - startTime) / 1000).toFixed(3);
+                log(`❌ Error: ${error.message}`, 'error');
+                
                 return {
                     success: false,
                     query: question,
                     error: error.message,
+                    result: null,
                     execution_time: parseFloat(executionTime),
                     timestamp: new Date().toISOString(),
-                    method: "cosmotalker.get()"
+                    method: "cosmotalker.get()",
+                    initialization_logs: statusLogs
                 };
             }
         }
@@ -155,20 +342,30 @@ else:
             const urlParams = new URLSearchParams(window.location.search);
             let question = urlParams.get('q') || urlParams.get('query') || urlParams.get('question');
             
+            // If no question, show loading screen and prompt
             if (!question) {
+                await initCosmoTalker();
+                log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'system');
+                log('💡 Usage: Add ?q=your question to the URL', 'info');
+                log('📝 Example: ?q=planet earth', 'info');
+                log('📝 Example: ?q=iss location', 'info');
+                log('📝 Example: ?q=spacex', 'info');
+                log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'system');
+                
                 const errorResponse = {
                     success: false,
                     error: "Missing 'q' parameter",
-                    usage: "?q=your space question",
+                    message: "Please provide a question using the 'q' parameter",
                     examples: [
                         "?q=planet earth",
-                        "?q=mars",
+                        "?q=mars", 
                         "?q=iss location",
-                        "?q=black hole",
+                        "?q=spacex",
                         "?q=fun fact"
                     ],
                     timestamp: new Date().toISOString()
                 };
+                
                 renderJSON(errorResponse);
                 return;
             }
@@ -177,30 +374,36 @@ else:
                 question = decodeURIComponent(question);
             } catch(e) {}
             
+            // Execute query and show loading
             const result = await executeQuery(question);
             renderJSON(result);
         }
         
         function renderJSON(data) {
             const jsonString = JSON.stringify(data, null, 2);
-            document.body.innerHTML = jsonString;
-            document.body.style.whiteSpace = "pre-wrap";
-            document.body.style.fontFamily = "monospace";
-            document.body.style.background = "#0a0e1a";
-            document.body.style.color = "#e2e8f0";
-            document.body.style.padding = "20px";
-            document.body.style.margin = "0";
-            document.body.style.fontSize = "14px";
-            document.body.style.lineHeight = "1.6";
             
-            // JSONP support
-            const callback = new URLSearchParams(location.search).get('callback');
-            if (callback && /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(callback)) {
-                document.body.innerHTML = `${callback}(${jsonString});`;
-            }
+            // Create result display
+            const resultDiv = document.createElement('div');
+            resultDiv.className = 'result-box';
+            resultDiv.innerHTML = `
+                <div class="result-header">
+                    📡 API Response (JSON)
+                </div>
+                <div class="json-response">
+                    <pre>${escapeHtml(jsonString)}</pre>
+                </div>
+            `;
+            
+            document.body.appendChild(resultDiv);
         }
         
-        // Start
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Start the API
         handleRequest();
     </script>
 </body>
