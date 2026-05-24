@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LLM Prompt Playground — CosmoTalker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&family=Exo+2:ital,wght@0,100;0,300;0,700;0,900;1,300&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --void: #000005;
+  --deep: #00000a;
+  --surface: #020210;
+  --surface2: #05051a;
+  --border: #0d1133;
+  --border2: #141650;
+  --cyan: #00f5ff;
+  --purple: #8b00ff;
+  --blue: #0066ff;
+  --pink: #ff00aa;
+  --orange: #ff6600;
+  --green: #00ff88;
+  --text: #8899cc;
+  --text-mid: #aabbdd;
+  --text-bright: #ddeeff;
+  --mono: 'Share Tech Mono', monospace;
+  --display: 'Exo 2', sans-serif;
+  --ui: 'Rajdhani', sans-serif;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--void);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+#cosmos-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200; height: 56px;
+  display: flex; align-items: center; justify-content: space-between; padding: 0 40px;
+  background: rgba(0,0,5,0.7); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border2);
+}
+nav::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cyan), var(--purple), transparent); opacity: 0.5;
+}
+.nav-logo {
+  font-family: var(--display); font-weight: 900; font-size: 18px; letter-spacing: 4px;
+  text-transform: uppercase; background: linear-gradient(135deg, var(--cyan), var(--purple));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; position: relative;
+}
+.nav-logo::before {
+  content: '⬡'; -webkit-text-fill-color: var(--cyan); margin-right: 8px; font-size: 14px;
+  animation: hexSpin 4s linear infinite; display: inline-block;
+}
+@keyframes hexSpin { to { transform: rotate(360deg); } }
+.nav-links { display: flex; gap: 28px; list-style: none; }
+.nav-links a {
+  color: var(--text); text-decoration: none; font-family: var(--ui); font-size: 12px;
+  font-weight: 500; letter-spacing: 3px; text-transform: uppercase; transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--cyan); }
+
+.layout { display: flex; min-height: 100vh; padding-top: 56px; position: relative; z-index: 1; }
+
+.sidebar {
+  width: 230px; flex-shrink: 0; position: sticky; top: 56px; height: calc(100vh - 56px);
+  overflow-y: auto; padding: 28px 0 60px; border-right: 1px solid var(--border);
+  background: rgba(0,0,8,0.6); backdrop-filter: blur(10px);
+  scrollbar-width: thin; scrollbar-color: var(--border2) transparent;
+}
+.sidebar-group { margin-bottom: 28px; }
+.sidebar-label {
+  font-family: var(--ui); font-size: 9px; font-weight: 700; letter-spacing: 4px;
+  text-transform: uppercase; color: var(--border2); padding: 0 20px 8px; display: block;
+}
+.sidebar a {
+  display: flex; align-items: center; gap: 10px; padding: 6px 20px; color: var(--text);
+  text-decoration: none; font-family: var(--ui); font-size: 12px; font-weight: 500;
+  letter-spacing: 0.5px; transition: all 0.2s; border-left: 2px solid transparent; margin-left: -1px;
+}
+.sidebar a:hover, .sidebar a.active {
+  color: var(--cyan); border-left-color: var(--cyan); background: rgba(0,245,255,0.04);
+  text-shadow: 0 0 8px rgba(0,245,255,0.4);
+}
+.sdot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+
+.content { flex: 1; max-width: 920px; padding: 70px 64px 140px; }
+
+.hero { margin-bottom: 90px; position: relative; }
+.hero-eyebrow { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; animation: fadeUp 0.7s ease both; }
+.eyebrow-line { width: 40px; height: 1px; background: linear-gradient(to right, transparent, var(--cyan)); }
+.eyebrow-text { font-family: var(--ui); font-size: 10px; font-weight: 600; letter-spacing: 5px; text-transform: uppercase; color: var(--cyan); }
+.hero h1 { font-family: var(--display); font-weight: 900; font-size: 60px; line-height: 1; letter-spacing: -1px; margin-bottom: 8px; animation: fadeUp 0.7s ease 0.1s both; }
+.hero h1 .line1 { display: block; color: var(--text-bright); }
+.hero h1 .line2 { display: block; background: linear-gradient(135deg, var(--cyan) 0%, var(--purple) 50%, var(--pink) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.hero-sub { font-family: var(--ui); font-size: 15px; font-weight: 300; color: var(--text-mid); line-height: 1.8; max-width: 680px; margin: 20px 0 36px; animation: fadeUp 0.7s ease 0.2s both; }
+
+.section { margin-bottom: 72px; }
+.section-header { display: flex; align-items: center; gap: 16px; margin-bottom: 30px; padding-bottom: 16px; border-bottom: 1px solid var(--border); position: relative; }
+.section-header::after { content: ''; position: absolute; bottom: -1px; left: 0; width: 80px; height: 1px; background: linear-gradient(to right, var(--cyan), transparent); }
+.sec-num { font-family: var(--display); font-weight: 900; font-size: 11px; color: var(--cyan); letter-spacing: 3px; opacity: 0.6; }
+.sec-title { font-family: var(--display); font-weight: 700; font-size: 16px; letter-spacing: 3px; color: var(--text-bright); text-transform: uppercase; }
+
+.code-wrap { background: #000008; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 20px; transition: border-color 0.3s, box-shadow 0.3s; }
+.code-wrap:hover { border-color: rgba(0,245,255,0.25); box-shadow: 0 0 30px rgba(0,245,255,0.04), inset 0 0 30px rgba(0,245,255,0.01); }
+.code-top { display: flex; align-items: center; justify-content: space-between; padding: 9px 16px; background: #000510; border-bottom: 1px solid var(--border); }
+.code-dots { display: flex; gap: 5px; }
+.code-dots span { width: 8px; height: 8px; border-radius: 50%; }
+.dot-r { background: #ff3b30; opacity: 0.7; } .dot-y { background: #ffcc02; opacity: 0.7; } .dot-g { background: #28cd41; opacity: 0.7; }
+.code-lang-label { font-family: var(--ui); font-size: 10px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: var(--text); display: flex; align-items: center; gap: 6px; }
+.copy-btn { background: transparent; border: 1px solid var(--border2); color: var(--text); font-family: var(--mono); font-size: 9px; letter-spacing: 2px; text-transform: uppercase; padding: 4px 10px; border-radius: 3px; cursor: pointer; transition: all 0.2s; }
+.copy-btn:hover { border-color: var(--cyan); color: var(--cyan); box-shadow: 0 0 8px rgba(0,245,255,0.2); }
+.copy-btn.ok { border-color: var(--green); color: var(--green); }
+pre { padding: 22px 24px; overflow-x: auto; scrollbar-width: thin; scrollbar-color: var(--border2) transparent; margin: 0;}
+code { font-family: var(--mono); font-size: 12.5px; line-height: 1.85; white-space: pre-wrap; word-wrap: break-word; color: #aabbdd; }
+
+table { width: 100%; border-collapse: collapse; margin-top: 10px; background: #000008; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; display: block; }
+th, td { padding: 12px 18px; border-bottom: 1px solid var(--border); text-align: left; font-size: 12px; }
+th { background: #000510; font-family: var(--ui); font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(0,245,255,0.015); }
+.td-task { color: var(--cyan); font-weight: bold; width: 30%; }
+.td-prompt { color: #ff9966; font-family: var(--mono); }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 900px) { .sidebar { display: none; } .content { padding: 40px 24px 80px; } .hero h1 { font-size: 40px; } nav { padding: 0 20px; } .nav-links { display: none; } }
+::-webkit-scrollbar { width: 5px; height: 5px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<canvas id="cosmos-canvas"></canvas>
+
+<nav>
+  <div class="nav-logo">CosmoTalker's PlayGround</div>
+  <ul class="nav-links">
+    <li><a href="developers.html">API Docs</a></li>
+    <li><a href="#universal">Universal</a></li>
+    <li><a href="#languages">Languages</a></li>
+    <li><a href="#advanced">Advanced</a></li>
+    <li><a href="#examples">Examples</a></li>
+  </ul>
+</nav>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-group">
+      <span class="sidebar-label">Core Prompts</span>
+      <a href="#universal">Universal Template</a>
+      <a href="#test">AI Quick Test</a>
+    </div>
+    <div class="sidebar-group">
+      <span class="sidebar-label">Languages</span>
+      <a href="#python"><span class="sdot" style="background:#3572A5"></span>Python</a>
+      <a href="#js"><span class="sdot" style="background:#f7df1e"></span>JavaScript</a>
+      <a href="#nodejs"><span class="sdot" style="background:#68a063"></span>Node.js</a>
+      <a href="#php"><span class="sdot" style="background:#777bb4"></span>PHP</a>
+      <a href="#java"><span class="sdot" style="background:#b07219"></span>Java</a>
+      <a href="#csharp"><span class="sdot" style="background:#178600"></span>C# / .NET</a>
+      <a href="#go"><span class="sdot" style="background:#00ADD8"></span>Go</a>
+      <a href="#bash"><span class="sdot" style="background:#89e051"></span>Bash</a>
+      <a href="#swift"><span class="sdot" style="background:#F05138"></span>Swift</a>
+      <a href="#rust"><span class="sdot" style="background:#DEA584"></span>Rust</a>
+      <a href="#kotlin"><span class="sdot" style="background:#A97BFF"></span>Kotlin</a>
+      <a href="#ruby"><span class="sdot" style="background:#701516"></span>Ruby</a>
+      <a href="#powershell"><span class="sdot" style="background:#012456"></span>PowerShell</a>
+      <a href="#dart"><span class="sdot" style="background:#00B4AB"></span>Dart</a>
+    </div>
+    <div class="sidebar-group">
+      <span class="sidebar-label">Advanced</span>
+      <a href="#cli">CLI Tool</a>
+      <a href="#widget">Web Widget</a>
+      <a href="#discord">Discord Bot</a>
+      <a href="#telegram">Telegram Bot</a>
+      <a href="#mobile">Mobile App UI</a>
+    </div>
+    <div class="sidebar-group">
+      <span class="sidebar-label">Reference</span>
+      <a href="#examples">Quick Examples</a>
+    </div>
+  </aside>
+
+  <main class="content">
+    <section class="hero" id="overview">
+      <div class="hero-eyebrow">
+        <span class="eyebrow-line"></span>
+        <span class="eyebrow-text">CosmoTalker · LLM Prompt Templates</span>
+      </div>
+      <h1>
+        <span class="line1">Prompt the</span>
+        <span class="line2">Machines.</span>
+      </h1>
+      <p class="hero-sub">
+        Use these carefully crafted prompts with any LLM (ChatGPT, Claude, Gemini, DeepSeek, etc.) to instantly generate API integration code in your preferred language or framework.
+      </p>
+    </section>
+
+    <!-- UNIVERSAL PROMPT -->
+    <section class="section" id="universal">
+      <div class="section-header">
+        <span class="sec-num">01</span>
+        <span class="sec-title">Universal Prompt Template</span>
+        <span class="sec-icon">🌍</span>
+      </div>
+      <p style="margin-bottom:16px; color:var(--text-mid)">Copy and paste this prompt into your favorite AI, replacing <code>[YOUR_LANGUAGE_HERE]</code>.</p>
+      <div class="code-wrap">
+        <div class="code-top">
+          <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+          <span class="code-lang-label">Prompt Text</span>
+          <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><code>You are an expert developer. Generate code to call the CosmoTalker API:
+
+API Endpoint: https://cosmotalker.onrender.com/api/get?q={query}
+
+Requirements:
+- Make a GET request to the API
+- Handle the JSON response
+- Extract and display the "data" field
+- Include error handling
+
+Generate code for: [YOUR_LANGUAGE_HERE]
+
+The code should be complete, runnable, and include comments.</code></pre>
+      </div>
+    </section>
+
+    <!-- AI PLAYGROUND QUICK TEST -->
+    <section class="section" id="test">
+      <div class="section-header">
+        <span class="sec-num">02</span>
+        <span class="sec-title">🤖 AI Playground - Quick Test</span>
+      </div>
+      <p style="margin-bottom:16px; color:var(--text-mid)">Try this comprehensive prompt with any LLM to build a full integration:</p>
+      <div class="code-wrap">
+        <div class="code-top">
+          <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+          <span class="code-lang-label">Prompt Text</span>
+          <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><code>Act as a senior developer. I need to integrate the CosmoTalker API 
+(https://cosmotalker.onrender.com/api/get?q={query}) into my [YOUR_PROJECT_TYPE] 
+using [YOUR_LANGUAGE].
+
+Generate complete, working code that:
+1. Takes user input for planet name
+2. Calls the API
+3. Handles errors gracefully
+4. Displays the information beautifully
+5. Includes comments explaining each step
+
+My project: [DESCRIBE_YOUR_PROJECT]
+Language: [YOUR_LANGUAGE]</code></pre>
+      </div>
+    </section>
+
+    <!-- LANGUAGES -->
+    <section class="section" id="languages">
+      <div class="section-header">
+        <span class="sec-num">03</span>
+        <span class="sec-title">Language-Specific Prompts</span>
+      </div>
+
+      <h3 id="python" style="color:var(--text-bright); margin: 30px 0 10px;">🐍 Python</h3>
+      <div class="code-wrap">
+        <div class="code-top">
+          <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div><span class="code-lang-label">Prompt</span><button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><code>Generate Python code using the requests library to call the CosmoTalker API at https://cosmotalker.onrender.com/api/get?q=mars
+
+Requirements:
+- Install requests if not present
+- Make GET request with query parameter
+- Parse JSON response
+- Print the "data" field
+- Add try/except error handling
+- Include a function that takes a planet name as parameter
+
+Make it production-ready with comments.</code></pre>
+      </div>
+
+      <h3 id="js" style="color:var(--text-bright); margin: 30px 0 10px;">📜 JavaScript (Browser)</h3>
+      <div class="code-wrap">
+        <div class="code-top">
+          <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div><span class="code-lang-label">Prompt</span><button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><code>Generate JavaScript code for a web browser to call the CosmoTalker API at https://cosmotalker.onrender.com/api/get?q=jupiter
+
+Requirements:
+- Use fetch() API
+- Handle async/await
+- Parse JSON response
+- Display the "data" field in an HTML element
+- Add loading state and error handling
+- Include a function that can be called with different planet names
+
+Make it ready to embed in any HTML page.</code></pre>
+      </div>
+
+      <h3 id="nodejs" style="color:var(--text-bright); margin: 30px 0 10px;">📘 Node.js</h3>
+      <div class="code-wrap">
+        <div class="code-top">
+          <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div><span class="code-lang-label">Prompt</span><button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><code>Generate Node.js code using axios to call the CosmoTalker API at https://cosmotalker.onrender.com/api/get?q=saturn
+
+Requirements:
+- Use axios or node-fetch
+- Async/await pattern
+- Parse JSON response
+- Console.log the "data" field
+- Add error handling for network issues
+- Export as a reusable module function
+
+Include package.json dependencies.</code></pre>
+      </div>
+
+      <h3 id="php" style="color:var(--text-bright); margin: 30px 0 10px;">🐘 PHP</h3>
+      <div class="code-wrap">
+        <div class="code-top">
+          <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div><span class="code-lang-label">Prompt</span><button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><code>Generate PHP code to call the CosmoTalker API at https://cosmotalker.onrender.com/api/get?q=venus
+
+Requirements:
+- Use file_get_contents() or cURL
+- Handle JSON decoding
+- Display the "data" field
+- Add error handling for failed requests
+- Create a reusable function
+
+Make it compatible with PHP 7.4+.</code></pre>
+      </div>
+
+      <h3 id="java" style="color:var(--text-bright); margin: 30px 0 10px;">☕ Java</h3>
+      <div class="code-wrap">
+        <div class="code-top">
+          <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div><span class="code-lang-label">Prompt</span><button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><code>Generate Java 17+ code to call the CosmoTalker API at https://cosmotalker.onrender.com/api/get?q=earth
+
+Requirements:
+- Use HttpClient (built-in)
+- Make async GET request
+- Parse JSON response
+- Print the "data" field
+- Add exception handling
+- Create a complete class with main method
+
+Include all necessary imports.</code></pre>
+      </div>
+
+      <h3 id="csharp" style="color:var(--text-bright); margin: 30px 0 10px;">🔷 C# / .NET</h3>
+      <div class="code-wrap">
+        <div class="code-top">
+          <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div><span class="code-lang-label">Prompt</span><button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><code>Generate C# .NET code to call the CosmoTalker API at https://cosmotalker.onrender.com/api/get?q=neptune
+
+Requirements:
+- Use HttpClient
+- Async/await pattern
+- Parse JSON using System.Text.Json
+- Display the "data" field
+- Add error handling
+- Create a console application
+
+Include using statements and Main method.</code></pre>
+      </div>
+
+      <h3 id="go" style="color:var(--text-bright); margin: 30px 0 10px;">🔵 Go</h3>
+      <div class="code-wrap">
+        <div class="code-top">
+          <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div><span class="code-lang-label">Prompt</span><button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><code>Generate Go code to call the CosmoTalker API at https://cosmotalker.onrender.com/api/get?q=pluto
+
+Requirements:
+- Use net/http package
+- Define a struct for JSON response
+- Make GET request
+- Decode JSON response
+- Print the "data" field
+- Add error handling
+
+Make it a complete main.go file.</code></pre>
+      </div>
+
+      <h3 id="bash" style="color:var(--text-bright); margin: 30px 0 10px;">🐚 Bash / Shell</h3>
+      <div class="code-wrap">
+        <div class="code-top">
+          <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div><span class="code-lang-label">Prompt</span><button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><code>Generate Bash script using cURL to call the CosmoTalker API at https://cosmotalker.onrender.com/api/get?q=mars
+
+Requirements:
+- Use curl with -s flag
+- Parse JSON using jq (or python3 -m json.tool)
+- Extract and display the "data" field
+- Take planet name as command line argument
+- Add error handling for missing jq
+
+Make it executable with shebang.</code></pre>
+      </div>
+
+      <h3 id="swift" style="color:var(--text-bright); margin: 30px 0 10px;">🍎 Swift</h3>
+      <div class="code-wrap">
+        <div class="code-top">
+          <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div><span class="code-lang-label">Prompt</span><button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><code>Generate Swift code for iOS/macOS to call the CosmoTalker API at https://cosmotalker.onrender.com/api/get?q=jupiter
+
+Requirements:
+- Use URLSession
+- Async/await (Swift 5.5+)
+- Decode JSON using Codable
+- Display the "data" field
+- Add error handling
+- Create a reusable function
+
+Include necessary imports and example usage.</code></pre>
+      </div>
+
+      <h3 id="rust" style="color:var(--text-bright); margin: 30px 0 10px;">🦀 Rust</h3>
+      <div class="code-wrap">
+        <div class="code-top">
+          <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div><span class="code-lang-label">Prompt</span><button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><code>Generate Rust code using reqwest to call the CosmoTalker API at https://cosmotalker.onrender.com/api/get?q=saturn
+
+Requirements:
+- Use reqwest and tokio
+- Define struct for JSON response with serde
+- Make async GET request
+- Parse JSON response
+- Print the "data" field
+- Add error handling
+
+Include Cargo.toml dependencies and main function.</code></pre>
+      </div>
+
+      <h3 id="kotlin" style="color:var(--text-bright); margin: 30px 0 10px;">📱 Kotlin (Android)</h3>
+      <div class="code-wrap">
+        <div class="code-top">
+          <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div><span class="code-lang-label">Prompt</span><button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><code>Generate Kotlin code for Android to call the CosmoTalker API at https://cosmotalker.onrender.com/api/get?q=earth
+
+Requirements:
+- Use Retrofit or Ktor
+- Define data class for response
+- Make network request
+- Handle JSON response
+- Display the "data" field
+- Add error handling and coroutines
+
+Include Gradle dependencies.</code></pre>
+      </div>
+
+      <h3 id="ruby" style="color:var(--text-bright); margin: 30px 0 10px;">🔴 Ruby</h3>
+      <div class="code-wrap">
+        <div class="code-top">
+          <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div><span class="code-lang-label">Prompt</span><button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><code>Generate Ruby code to call the CosmoTalker API at https://cosmotalker.onrender.com/api/get?q=venus
+
+Requirements:
+- Use net/http or httparty gem
+- Parse JSON response
+- Display the "data" field
+- Add error handling
+- Create a reusable method
+
+Make it runnable as a script.</code></pre>
+      </div>
+
+      <h3 id="powershell" style="color:var(--text-bright); margin: 30px 0 10px;">📊 PowerShell</h3>
+      <div class="code-wrap">
+        <div class="code-top">
+          <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div><span class="code-lang-label">Prompt</span><button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><code>Generate PowerShell script to call the CosmoTalker API at https://cosmotalker.onrender.com/api/get?q=mercury
+
+Requirements:
+- Use Invoke-RestMethod
+- Handle JSON response
+- Display the "data" field
+- Accept query as parameter
+- Add error handling using try/catch
+
+Make it cross-platform compatible (PowerShell 7+).</code></pre>
+      </div>
+
+      <h3 id="dart" style="color:var(--text-bright); margin: 30px 0 10px;">🔷 Dart (Flutter)</h3>
+      <div class="code-wrap">
+        <div class="code-top">
+          <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div><span class="code-lang-label">Prompt</span><button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><code>Generate Dart code for Flutter to call the CosmoTalker API at https://cosmotalker.onrender.com/api/get?q=uranus
+
+Requirements:
+- Use http package
+- Make GET request
+- Parse JSON using dart:convert
+- Display the "data" field
+- Add async/await and error handling
+- Create a Future function
+
+Include pubspec.yaml dependencies.</code></pre>
+      </div>
+    </section>
+
+    <!-- ADVANCED PROMPT TEMPLATES -->
+    <section class="section" id="advanced">
+      <div class="section-header">
+        <span class="sec-num">04</span>
+        <span class="sec-title">🎯 Advanced Prompt Templates</span>
+      </div>
+
+      <h3 id="cli" style="color:var(--text-bright); margin: 30px 0 10px;">Build a CLI Tool</h3>
+      <div class="code-wrap">
+        <div class="code-top">
+          <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div><span class="code-lang-label">Prompt</span><button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><code>Generate a complete command-line interface (CLI) tool in [LANGUAGE] that:
+- Accepts planet name as argument or interactive input
+- Calls the CosmoTalker API
+- Displays formatted output with colors
+- Caches recent queries
+- Handles network errors gracefully
+
+API: https://cosmotalker.onrender.com/api/get?q={query}
+
+Make it production-ready with help text.</code></pre>
+      </div>
+
+      <h3 id="widget" style="color:var(--text-bright); margin: 30px 0 10px;">Create a Web Widget</h3>
+      <div class="code-wrap">
+        <div class="code-top">
+          <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div><span class="code-lang-label">Prompt</span><button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><code>Generate HTML/CSS/JavaScript code for an embeddable widget that:
+- Shows a search box for planet names
+- Calls the CosmoTalker API
+- Displays results with cosmic styling
+- Shows loading animation
+- Works on any website
+
+API: https://cosmotalker.onrender.com/api/get?q={query}
+
+Make it responsive and dark-themed.</code></pre>
+      </div>
+
+      <h3 id="discord" style="color:var(--text-bright); margin: 30px 0 10px;">Build a Discord Bot</h3>
+      <div class="code-wrap">
+        <div class="code-top">
+          <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div><span class="code-lang-label">Prompt</span><button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><code>Generate Discord bot code in [LANGUAGE] that:
+- Responds to !space [planet] command
+- Calls the CosmoTalker API
+- Formats response as Discord embed
+- Handles rate limiting
+- Includes error messages
+
+API: https://cosmotalker.onrender.com/api/get?q={query}
+
+Use discord.js (Node.js) or nextcord (Python).</code></pre>
+      </div>
+
+      <h3 id="telegram" style="color:var(--text-bright); margin: 30px 0 10px;">Create a Telegram Bot</h3>
+      <div class="code-wrap">
+        <div class="code-top">
+          <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div><span class="code-lang-label">Prompt</span><button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><code>Generate Telegram bot code in [LANGUAGE] that:
+- Responds to /planet [name] command
+- Calls the CosmoTalker API
+- Returns formatted message with planet info
+- Supports inline queries
+- Handles API failures
+
+API: https://cosmotalker.onrender.com/api/get?q={query}
+
+Use python-telegram-bot or node-telegram-bot-api.</code></pre>
+      </div>
+
+      <h3 id="mobile" style="color:var(--text-bright); margin: 30px 0 10px;">Build a Mobile App UI</h3>
+      <div class="code-wrap">
+        <div class="code-top">
+          <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div><span class="code-lang-label">Prompt</span><button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><code>Generate React Native / Flutter code that:
+- Has a search screen for planets
+- Calls the CosmoTalker API
+- Displays results with images/animations
+- Saves recent searches
+- Handles offline states
+
+API: https://cosmotalker.onrender.com/api/get?q={query}
+
+Make it production-ready with error boundaries.</code></pre>
+      </div>
+    </section>
+
+    <!-- QUICK EXAMPLES -->
+    <section class="section" id="examples">
+      <div class="section-header">
+        <span class="sec-num">05</span>
+        <span class="sec-title">💡 Quick AI Code Generation Examples</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Task</th>
+            <th>Sample Prompt</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="td-task">Simple GET</td>
+            <td class="td-prompt">"Write [LANGUAGE] code to GET planet data from https://cosmotalker.onrender.com/api/get?q=mars and print the response"</td>
+          </tr>
+          <tr>
+            <td class="td-task">With Error Handling</td>
+            <td class="td-prompt">"Add retry logic and timeout to the [LANGUAGE] code calling CosmoTalker API"</td>
+          </tr>
+          <tr>
+            <td class="td-task">Async Version</td>
+            <td class="td-prompt">"Convert the CosmoTalker API call to async/await in [LANGUAGE]"</td>
+          </tr>
+          <tr>
+            <td class="td-task">With Caching</td>
+            <td class="td-prompt">"Add file-based caching to the [LANGUAGE] code so repeated queries for same planet are instant"</td>
+          </tr>
+          <tr>
+            <td class="td-task">CLI with Args</td>
+            <td class="td-prompt">"Modify the [LANGUAGE] code to accept planet name as command-line argument"</td>
+          </tr>
+          <tr>
+            <td class="td-task">JSON Pretty Print</td>
+            <td class="td-prompt">"Format the API response as pretty-printed JSON in [LANGUAGE]"</td>
+          </tr>
+          <tr>
+            <td class="td-task">Add Headers</td>
+            <td class="td-prompt">"Add custom User-Agent header to the [LANGUAGE] request"</td>
+          </tr>
+          <tr>
+            <td class="td-task">Batch Queries</td>
+            <td class="td-prompt">"Write [LANGUAGE] code to query multiple planets: Mars, Jupiter, Saturn and compare their data"</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+</div>
+
+<script>
+(function() {
+  const canvas = document.getElementById('cosmos-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, stars = [], nebulae = [], asteroids = [];
+
+  function resize() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    buildStars();
+    buildNebulae();
+    buildAsteroids();
+  }
+
+  function buildStars() {
+    stars = [];
+    const count = Math.floor(W * H / 1200);
+    for (let i = 0; i < count; i++) {
+      const r = Math.random();
+      stars.push({
+        x: Math.random() * W, y: Math.random() * H,
+        r: r < 0.7 ? Math.random() * 0.6 + 0.1 : r < 0.95 ? Math.random() * 1.2 + 0.6 : Math.random() * 2 + 1.2,
+        alpha: Math.random() * 0.7 + 0.2, twinkleSpeed: Math.random() * 0.02 + 0.003, twinkleOffset: Math.random() * Math.PI * 2,
+        color: ['#ffffff','#cce4ff','#ffeecc','#eeccff'][Math.floor(Math.random()*4)],
+      });
+    }
+  }
+
+  function buildNebulae() {
+    nebulae = [
+      { x: W*0.15, y: H*0.25, r: 280, c1: 'rgba(60,0,120,', c2: 'rgba(0,20,80,' },
+      { x: W*0.8,  y: H*0.6,  r: 240, c1: 'rgba(0,60,100,', c2: 'rgba(20,0,60,' },
+      { x: W*0.5,  y: H*0.85, r: 200, c1: 'rgba(80,0,40,',  c2: 'rgba(0,40,80,' },
+    ];
+  }
+
+  function buildAsteroids() {
+    asteroids = [];
+    for (let i = 0; i < 8; i++) {
+      asteroids.push({
+        x: Math.random() * W, y: Math.random() * H, z: Math.random() * 0.6 + 0.2,
+        vx: (Math.random() - 0.5) * 0.08, vy: (Math.random() - 0.5) * 0.04, r: Math.random() * 2 + 1,
+      });
+    }
+  }
+
+  function draw(ts) {
+    ctx.clearRect(0, 0, W, H);
+    const bg = ctx.createRadialGradient(W*0.5, H*0.4, 0, W*0.5, H*0.4, Math.max(W,H)*0.8);
+    bg.addColorStop(0, '#00000d');
+    bg.addColorStop(1, '#000000');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    nebulae.forEach(n => {
+      const g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r);
+      g.addColorStop(0, n.c1 + '0.07)'); g.addColorStop(0.5, n.c2 + '0.04)'); g.addColorStop(1, 'transparent');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(n.x, n.y, n.r, n.r * 0.6, 0.4, 0, Math.PI*2); ctx.fill();
+    });
+
+    const t = ts * 0.001;
+    stars.forEach(s => {
+      const alpha = s.alpha * (0.6 + 0.4 * Math.sin(t * s.twinkleSpeed * 60 + s.twinkleOffset));
+      ctx.globalAlpha = alpha;
+      if (s.r > 1.5) {
+        const sg = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r * 3);
+        sg.addColorStop(0, s.color); sg.addColorStop(1, 'transparent');
+        ctx.fillStyle = sg; ctx.beginPath(); ctx.arc(s.x, s.y, s.r * 3, 0, Math.PI*2); ctx.fill();
+      }
+      ctx.fillStyle = s.color; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI*2); ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+
+    asteroids.forEach(a => {
+      a.x += a.vx * a.z; a.y += a.vy * a.z;
+      if (a.x < -20) a.x = W + 20; if (a.x > W+20) a.x = -20;
+      if (a.y < -20) a.y = H + 20; if (a.y > H+20) a.y = -20;
+      ctx.globalAlpha = a.z * 0.25; ctx.fillStyle = '#556688';
+      ctx.beginPath(); ctx.arc(a.x, a.y, a.r * a.z, 0, Math.PI*2); ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+  requestAnimationFrame(draw);
+})();
+
+function copyCode(btn) {
+  const pre = btn.closest('.code-wrap').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    btn.textContent = 'COPIED!';
+    btn.classList.add('ok');
+    setTimeout(() => { btn.textContent = 'COPY'; btn.classList.remove('ok'); }, 1800);
+  });
+}
+
+const sections = document.querySelectorAll('.section, .hero');
+const links = document.querySelectorAll('.sidebar a');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const id = e.target.id;
+      links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + id));
+    }
+  });
+}, { threshold: 0.25 });
+sections.forEach(s => obs.observe(s));
+</script>
+<img src="https://count.getloli.com/@bhuvanesh-m-dev?name=bhuvanesh-m-dev&theme=ai-1&padding=0&offset=0&align=top&scale=0.1&pixelated=1&darkmode=auto" width="1" height="1" alt="" style="position:absolute;visibility:hidden;" />
+</body>
+</html>
